@@ -64,6 +64,9 @@ body{
 .keys b.kb.dn{ background:rgba(255,42,30,.2); border-color:#ff2a1e; box-shadow:0 0 14px rgba(255,42,30,.4); }
 .mouse{ color:#6f8f7a; animation:mseek 3s ease-in-out infinite; }
 @keyframes mseek{ 0%,100%{ transform:translateX(-4px) rotate(-4deg); } 50%{ transform:translateX(4px) rotate(4deg); } }
+.mbtn{ fill:#39ff7a; fill-opacity:.3; animation:mpulse 2.4s ease-in-out infinite; }
+.mbtn.dn{ fill:#ff2a1e; fill-opacity:.9; animation:none; }
+@keyframes mpulse{ 0%,100%{ fill-opacity:.2; } 50%{ fill-opacity:.95; } }
 .gjoy{ position:fixed; left:calc(2.2rem + env(safe-area-inset-left,0px)); bottom:calc(5.5rem + env(safe-area-inset-bottom,0px)); width:110px; height:110px; border-radius:50%; border:1px solid rgba(57,255,122,.3); pointer-events:none; z-index:3; }
 .gjoy i{ position:absolute; left:50%; top:50%; width:44px; height:44px; margin:-22px 0 0 -22px; border-radius:50%; background:rgba(57,255,122,.14); border:1px solid rgba(57,255,122,.5); animation:gj 3.2s ease-in-out infinite; }
 @keyframes gj{ 0%,100%{ transform:translate(0,0); } 25%{ transform:translate(0,-28px); } 50%{ transform:translate(18px,-18px); } 75%{ transform:translate(-14px,-24px); } }
@@ -79,9 +82,9 @@ body{
 <div class="ring" id="ring"></div>
 <div class="hint" id="hint"></div>
 <div class="keys" id="keys">
-  <div class="kg cue" id="gLook"><svg class="mouse" viewBox="0 0 24 36" width="24" height="36"><rect x="2" y="2" width="20" height="32" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <div class="kg cue" id="gLook"><svg class="mouse" viewBox="0 0 24 36" width="24" height="36"><rect x="2" y="2" width="20" height="32" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/><path id="mBtn" class="mbtn" d="M12 2 A10 10 0 0 0 2 12 V14 H12 Z"/></svg></div>
   <div class="kg cue" id="gMove"><div class="kw"><i></i><b id="kW">W</b><i></i><b id="kA">A</b><b id="kS">S</b><b id="kD">D</b></div></div>
-  <div class="kg cue" id="gAct"><b class="kb" id="kSp"></b></div>
+  
 </div>
 <div class="gjoy cue" id="gJoy"><i></i></div>
 <div class="glook cue" id="gLk"><i></i></div>
@@ -100,8 +103,8 @@ body{
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage = document.getElementById('stage');
   var hintEl = document.getElementById('hint'), joyEl = document.getElementById('joy'), knobEl = document.getElementById('knob'), ringEl = document.getElementById('ring');
-  var gLookEl = document.getElementById('gLook'), gMoveEl = document.getElementById('gMove'), gActEl = document.getElementById('gAct'), gJoyEl = document.getElementById('gJoy'), gLkEl = document.getElementById('gLk');
-  var kW = document.getElementById('kW'), kA = document.getElementById('kA'), kS = document.getElementById('kS'), kD = document.getElementById('kD'), kSp = document.getElementById('kSp');
+  var gLookEl = document.getElementById('gLook'), gMoveEl = document.getElementById('gMove'), gJoyEl = document.getElementById('gJoy'), gLkEl = document.getElementById('gLk');
+  var kW = document.getElementById('kW'), kA = document.getElementById('kA'), kS = document.getElementById('kS'), kD = document.getElementById('kD'), mBtn = document.getElementById('mBtn');
   function fail(){ document.getElementById('fail').style.display='flex'; hintEl.style.display='none'; }
   if(!window.THREE){ fail(); return; }
 
@@ -131,7 +134,7 @@ body{
   var cv = renderer.domElement;
   cv.tabIndex = 0;
   cv.setAttribute('role','img');
-  cv.setAttribute('aria-label','A first-person view of a vast, almost lightless stone hall with a liquid chrome form floating over a stepped platform in the middle and a pale window far away. Walk with WASD or the left thumb, look with the mouse or by dragging, and hold space or the ring to charge the form and release to send a shockwave.');
+  cv.setAttribute('aria-label','A first-person view of a vast, almost lightless stone hall with a liquid chrome form floating over a stepped platform in the middle and a pale window far away. Walk with WASD or the left thumb, look with the mouse or by dragging, and hold the left mouse button or the ring to charge the form and release to send a shockwave.');
   cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
   var useComposer = !!(THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass && THREE.ShaderPass);
@@ -140,7 +143,8 @@ body{
   scene.fog = new THREE.FogExp2(0x010302, 0.043);
   var camera = new THREE.PerspectiveCamera(62, innerWidth/innerHeight, 0.1, 90);
   camera.rotation.order = 'YXZ';
-  function setFov(){ camera.fov = (innerWidth/innerHeight < 1) ? 72 : 62; camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+  var baseFov = 62, lastFov = 62;
+  function setFov(){ baseFov = (innerWidth/innerHeight < 1) ? 72 : 62; camera.fov = baseFov; lastFov = baseFov; camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
   setFov();
 
   function clamp01(x){ return Math.min(1, Math.max(0, x)); }
@@ -160,15 +164,12 @@ body{
      ===================================================================== */
   var WU = {
     uWaveC:{value:new THREE.Vector3(0,3.6,0)},
-    uWaveR:{value:0}, uWaveAmp:{value:0}, uTrail:{value:10}, uHot:{value:0}, uMode:{value:0}
+    uWR:{value:[0,0,0,0,0,0]}, uWA:{value:[0,0,0,0,0,0]}, uWT:{value:[10,10,10,10,10,10]}, uWH:{value:[0,0,0,0,0,0]},
+    uWM:{value:[0,0,0,0,0,0]}, uWK:{value:[0,0,0,0,0,0]}, uWS:{value:[15,15,15,15,15,15]}
   };
   var WIRE_FRAG = [
     '{',
     ' float dd = length(vWPos - uWaveC);',
-    ' float fr = dd - uWaveR;',
-    ' float ahead = smoothstep(0.9, 0.0, fr);',
-    ' float behind = smoothstep(-uTrail, -0.4, fr);',
-    ' float zone = ahead*behind*uWaveAmp;',
     ' float wm = min(min(vB.x, vB.y), vB.z);',
     ' float fw = fwidth(wm);',
     ' float wire = 1.0 - smoothstep(fw*0.6, fw*1.7, wm);',
@@ -178,14 +179,41 @@ body{
     ' vec2 gw = fwidth(gq);',
     ' vec2 gl = abs(fract(gq - 0.5) - 0.5)/max(gw, vec2(0.0005));',
     ' float grid = 1.0 - min(min(gl.x, gl.y)/1.3, 1.0);',
-    ' float pat = mix(wire, grid, uMode);',
-    ' float lead = exp(-fr*fr*1.6)*uWaveAmp;',
-    ' float sy = vWPos.y - uWaveR;',
-    ' vec3 wc = mix(vec3(0.1,1.0,0.4), vec3(1.0,0.06,0.03), uHot);',
-    ' gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - mix(0.8, 0.5, uMode)*zone) + wc*pat*(zone*1.8 + lead*2.2) + wc*lead*mix(0.1, 0.3, uMode);',
+    ' float dark = 0.0; vec3 wadd = vec3(0.0);',
+    ' for(int wi = 0; wi < 6; wi++){',
+    '  float wa = uWA[wi];',
+    '  if(wa > 0.0005){',
+    '   float fr = dd - uWR[wi];',
+    '   float ahead = smoothstep(0.9, 0.0, fr);',
+    '   float behind = smoothstep(-uWT[wi], -0.4, fr);',
+    '   float zone = ahead*behind*wa;',
+    '   float md = uWM[wi];',
+    '   float pat = mix(wire, grid, md);',
+    '   float lead = exp(-fr*fr*1.6)*wa;',
+    '   vec3 wc = mix(vec3(0.1,1.0,0.4), vec3(1.0,0.06,0.03), uWH[wi]);',
+    '   dark = max(dark, mix(0.8, 0.5, md)*zone);',
+    '   wadd += wc*pat*(zone*1.8 + lead*2.2) + wc*lead*mix(0.1, 0.3, md);',
+    '  }',
+    ' }',
+    ' gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - dark) + min(wadd, vec3(3.2));',
     '}'
   ].join('\n');
-  function patch(m){
+  var HEAT_FRAG = [
+    '{',
+    ' float hd = length(vWPos - uWaveC);',
+    ' vec3 hadd = vec3(0.0);',
+    ' for(int hi = 0; hi < 6; hi++){',
+    '  float kq = uWK[hi];',
+    '  if(kq > 0.001){',
+    '   float dl = uWR[hi] - hd;',
+    '   float hk = kq*step(0.0, dl)*exp(-max(dl, 0.0)/(uWS[hi]*1.8))*smoothstep(0.0, 0.6, dl);',
+    '   hadd += mix(vec3(1.0,0.1,0.02), vec3(1.0,0.5,0.12), hk)*hk*(1.5 + 1.0*uWH[hi]);',
+    '  }',
+    ' }',
+    ' gl_FragColor.rgb += min(hadd, vec3(3.0));',
+    '}'
+  ].join('\n');
+  function patch(m, heat){
     m.extensions = {derivatives:true};
     m.onBeforeCompile = function(sh){
       for(var k in WU) sh.uniforms[k] = WU[k];
@@ -193,8 +221,8 @@ body{
         .replace('#include <common>', '#include <common>\nattribute vec3 aB; varying vec3 vB; varying vec3 vWPos;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvB = aB; vWPos = (modelMatrix*vec4(transformed,1.0)).xyz;');
       sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform vec3 uWaveC; uniform float uWaveR; uniform float uWaveAmp; uniform float uTrail; uniform float uHot; uniform float uMode;\nvarying vec3 vB; varying vec3 vWPos;')
-        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + WIRE_FRAG);
+        .replace('#include <common>', '#include <common>\nuniform vec3 uWaveC; uniform float uWR[6]; uniform float uWA[6]; uniform float uWT[6]; uniform float uWH[6]; uniform float uWM[6]; uniform float uWK[6]; uniform float uWS[6];\nvarying vec3 vB; varying vec3 vWPos;')
+        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + WIRE_FRAG + (heat ? HEAT_FRAG : ''));
     };
     return m;
   }
@@ -276,6 +304,7 @@ body{
   });
   var matFloor = patch(new THREE.MeshStandardMaterial({map:floorQ, roughness:1.0, metalness:0.0, color:0x78716b}));
   var matDais  = patch(new THREE.MeshStandardMaterial({map:metalT, roughness:0.85, metalness:0.08, color:0x72867d}));
+  var matBar   = patch(new THREE.MeshStandardMaterial({map:metalT, roughness:0.88, metalness:0.06, color:0x6a797e}), true);
 
   /* =====================================================================
      GEOMETRY HELPERS
@@ -390,7 +419,8 @@ body{
       var bm = new THREE.Mesh(geo, bannerMat); bm.position.set(x,7,-HALF+0.45); g.add(bm);
       var pc = geo.attributes.position.count, oz = new Float32Array(pc), oy = new Float32Array(pc);
       for(var q=0;q<pc;q++){ oz[q] = geo.attributes.position.getZ(q); oy[q] = geo.attributes.position.getY(q); }
-      banners.push({geo:geo, oz:oz, oy:oy, ph:Math.random()*6});
+      bm.updateWorldMatrix(true, false); var bwp = new THREE.Vector3(); bm.getWorldPosition(bwp);
+      banners.push({geo:geo, oz:oz, oy:oy, ph:Math.random()*6, d:Math.sqrt(bwp.x*bwp.x + (bwp.y-3.6)*(bwp.y-3.6) + bwp.z*bwp.z)});
       add(g, boxG(2.7,0.16,0.16, 1,1,1, 4), matMetal, x,10.1,-HALF+0.45);
     });
   });
@@ -408,12 +438,13 @@ body{
       var hf = new THREE.Mesh(new THREE.ConeGeometry(0.34,1.1,6), hm); hf.position.y = -c[2]+0.5; g.add(hf);
       hang.push({mesh:hf, mat:hm, ph:Math.random()*6});
     }
-    chains.push({group:g, ph:Math.random()*6});
+    var cd2 = Math.sqrt(c[0]*c[0] + c[1]*c[1]) || 1;
+    chains.push({group:g, ph:Math.random()*6, d:Math.sqrt(c[0]*c[0] + (H-3.6)*(H-3.6) + c[1]*c[1]), ux:c[0]/cd2, uz:c[1]/cd2});
   });
 
   // arena floor inlays: iron bands set into the stone, no glow
   function inlayRing(r0, r1, y){
-    var m = add(room, scaleUV(new THREE.RingGeometry(r0, r1, 8), r1*2/4), matMetal, 0,y,0);
+    var m = add(room, scaleUV(new THREE.RingGeometry(r0, r1, 8), r1*2/4), matBar, 0,y,0);
     m.rotation.x = -Math.PI/2; m.rotation.z = Math.PI/8; return m;
   }
   inlayRing(6.1, 6.9, 0.035);
@@ -421,7 +452,7 @@ body{
   inlayRing(16.4, 17.3, 0.035);
   for(var k=0;k<8;k++){
     var a = k*Math.PI/4 + Math.PI/8;
-    var bar = add(room, boxG(0.55,0.07,17, 1,1,12, 4), matMetal, Math.sin(a)*15.5, 0.03, Math.cos(a)*15.5);
+    var bar = add(room, boxG(0.55,0.07,17, 1,1,12, 4), matBar, Math.sin(a)*15.5, 0.03, Math.cos(a)*15.5);
     bar.rotation.y = a;
   }
 
@@ -492,16 +523,19 @@ body{
   dgeo.setAttribute('aSeed', new THREE.BufferAttribute(dseed,1));
   var dmat = new THREE.ShaderMaterial({
     transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-    uniforms:{ uTime:{value:0}, uC:{value:new THREE.Vector3(0,3.6,0)}, uLevel:{value:0}, uSize:{value:30} },
+    uniforms:{ uTime:{value:0}, uC:{value:new THREE.Vector3(0,3.6,0)}, uLevel:{value:0}, uSize:{value:30}, uAttr:{value:0}, uBurst:{value:0} },
     vertexShader:[
-      'uniform float uTime; uniform vec3 uC; uniform float uLevel; uniform float uSize; attribute float aSeed; varying float vA;',
+      'uniform float uTime; uniform vec3 uC; uniform float uLevel; uniform float uSize; uniform float uAttr; uniform float uBurst; attribute float aSeed; varying float vA;',
       'void main(){',
       ' vec3 p = position;',
       ' p.x += sin(uTime*0.07 + aSeed*3.1)*1.6 + sin(uTime*0.21 + aSeed)*0.4;',
       ' p.y = mod(position.y + uTime*0.15 + aSeed, 18.0) + 0.3;',
       ' p.z += cos(uTime*0.06 + aSeed*2.3)*1.6;',
+      ' vec3 dr = p - uC; float dl = max(length(dr), 0.001); vec3 nd = dr/dl;',
+      ' p = uC + dr*(1.0 - 0.55*uAttr);',
+      ' p += nd*uBurst*(2.5 + 5.0*fract(aSeed*7.13))*smoothstep(26.0, 1.0, dl);',
       ' float d = length(p - uC);',
-      ' vA = (smoothstep(14.0, 1.5, d)*0.6 + 0.015)*uLevel*(0.55 + 0.45*sin(uTime*1.3 + aSeed*5.0));',
+      ' vA = (smoothstep(14.0, 1.5, d)*0.6 + 0.015)*uLevel*(0.55 + 0.45*sin(uTime*1.3 + aSeed*5.0))*(1.0 + 0.8*uAttr + 0.8*uBurst);',
       ' vec4 mv = modelViewMatrix*vec4(p,1.0);',
       ' gl_PointSize = uSize/max(0.5, -mv.z);',
       ' gl_Position = projectionMatrix*mv; }'
@@ -549,8 +583,8 @@ body{
   ].join('\n');
 
   var VERT = [
-    'uniform float uTime; uniform float uPull; uniform float uCharge; uniform float uWaveT; uniform float uWaveAmp;',
-    'uniform vec3 uMag; uniform vec3 uWaveO;',
+    'uniform float uTime; uniform float uPull; uniform float uCharge; uniform float uWaveT[3]; uniform float uWaveAmp[3];',
+    'uniform vec3 uMag; uniform vec3 uWaveO[3];',
     'attribute vec3 aB;',
     'varying vec3 vWN; varying vec3 vWP; varying vec3 vL; varying float vD; varying vec3 vB;',
     NOISE,
@@ -565,9 +599,13 @@ body{
     ' float d = n*0.42;',
     ' float m = max(dot(p,uMag), 0.0);',
     ' d += uPull*(0.16*pow(m,3.0) + 0.34*pow(m,14.0));',
-    ' float ang = acos(clamp(dot(p,uWaveO), -1.0, 1.0));',
-    ' float q = ang - uWaveT*2.6;',
-    ' d += uWaveAmp*sin(q*11.0)*exp(-abs(q)*3.2)*exp(-uWaveT*0.9);',
+    ' for(int wi = 0; wi < 3; wi++){',
+    '  if(uWaveAmp[wi] > 0.001){',
+    '   float ang = acos(clamp(dot(p,uWaveO[wi]), -1.0, 1.0));',
+    '   float q = ang - uWaveT[wi]*2.6;',
+    '   d += uWaveAmp[wi]*sin(q*11.0)*exp(-abs(q)*3.2)*exp(-uWaveT[wi]*0.9);',
+    '  }',
+    ' }',
     ' return d;',
     '}',
     'void main(){',
@@ -589,8 +627,18 @@ body{
 
   var FRAG = [
     'uniform float uTime; uniform float uCharge; uniform float uScan; uniform float uWireAmt; uniform vec2 uTilt; uniform vec3 uMag;',
+    'uniform highp samplerCube uEnv; uniform float uEnvAmt; uniform float uCrack;',
     'varying vec3 vWN; varying vec3 vWP; varying vec3 vL; varying float vD; varying vec3 vB;',
     'mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c,-s,s,c); }',
+    'vec3 hash33(vec3 p){ p = vec3(dot(p,vec3(127.1,311.7,74.7)), dot(p,vec3(269.5,183.3,246.1)), dot(p,vec3(113.5,271.9,124.6))); return fract(sin(p)*43758.5453); }',
+    'vec3 worl(vec3 p){',
+    ' vec3 ip = floor(p), fp = fract(p); float f1 = 9.0, f2 = 9.0, hh = 0.0;',
+    ' for(int i=-1;i<=1;i++){ for(int j=-1;j<=1;j++){ for(int k=-1;k<=1;k++){',
+    '  vec3 g = vec3(float(i),float(j),float(k)); vec3 o = hash33(ip+g); vec3 d = g + o - fp; float dd = dot(d,d);',
+    '  if(dd < f1){ f2 = f1; f1 = dd; hh = o.x; } else if(dd < f2){ f2 = dd; }',
+    ' }}}',
+    ' return vec3(sqrt(f1), sqrt(f2), hh);',
+    '}',
     'vec3 env(vec3 r, float hot){',
     ' r.xz = rot(uTime*0.05 + uTilt.x*1.2)*r.xz;',
     ' r.yz = rot(uTilt.y*0.8)*r.yz;',
@@ -625,13 +673,26 @@ body{
     ' float nv = max(dot(n,v), 0.0);',
     ' float fres = pow(1.0 - nv, 3.0);',
     ' float hot = uCharge*pow(max(dot(n,uMag),0.0), 4.0);',
-    ' vec3 c = env(r, hot);',
+    ' float ea = clamp(uEnvAmt, 0.0, 1.0);',
+    ' vec3 rt1 = normalize(cross(r, vec3(0.0,1.0,0.001))); vec3 rt2 = cross(r, rt1);',
+    ' vec3 rf = (textureCube(uEnv, normalize(r + (rt1 + rt2)*0.11)).rgb + textureCube(uEnv, normalize(r + (rt1 - rt2)*0.11)).rgb + textureCube(uEnv, normalize(r + (rt2 - rt1)*0.11)).rgb + textureCube(uEnv, normalize(r - (rt1 + rt2)*0.11)).rgb)*0.25;',
+    ' vec3 c = env(r, hot)*(1.0 - 0.45*ea) + rf*uEnvAmt;',
     ' c *= vec3(0.8,0.95,0.84);',
     ' c = c*(0.5 + 0.9*fres) + vec3(0.0,0.45,0.12)*fres*0.8;',
     ' float w = abs(fract(vD*9.0 + uTime*0.03) - 0.5);',
     ' float vein = 1.0 - smoothstep(0.0, 0.03, w);',
     ' c += mix(vec3(0.0,1.0,0.35), vec3(1.0,0.05,0.03), hot)*vein*(0.1 + 1.8*uCharge*(0.3+hot));',
     ' c += vec3(1.0,0.04,0.02)*hot*0.45;',
+    ' vec3 wk = worl(normalize(vL)*1.7 + 3.7);',
+    ' float ce = wk.y - wk.x + 0.02*sin(dot(vL, vec3(37.0,29.0,41.0)));',
+    ' float cw = 0.03 + 0.1*uCrack;',
+    ' float seam = 1.0 - smoothstep(0.0, cw, ce);',
+    ' float open = smoothstep(wk.z*0.7, wk.z*0.7 + 0.16, uCrack);',
+    ' float ek = seam*open;',
+    ' float spill = (1.0 - smoothstep(0.0, cw*3.2, ce))*open;',
+    ' float pulse = 0.8 + 0.2*sin(uTime*5.0 + vD*9.0);',
+    ' vec3 ember = mix(vec3(1.0,0.1,0.02), vec3(1.0,0.72,0.3), ek*uCrack);',
+    ' c += ember*ek*(1.3 + 3.4*uCrack)*pulse + vec3(0.9,0.08,0.01)*spill*0.3*uCrack;',
     ' vec3 wc = vec3(0.1,1.0,0.4)*(1.3 + 0.7*sin(vL.y*6.0 - uTime*2.0));',
     ' vec3 col = c*solidM + wc*wireA*wireOnly;',
     ' float q = (vL.y - uScan)*10.0;',
@@ -645,9 +706,9 @@ body{
     vertexShader: VERT, fragmentShader: FRAG, side: THREE.DoubleSide,
     extensions: { derivatives: true },
     uniforms:{
-      uTime:{value:0}, uPull:{value:0}, uCharge:{value:0}, uWaveT:{value:9}, uWaveAmp:{value:0},
-      uMag:{value:new THREE.Vector3(0,0,1)}, uWaveO:{value:new THREE.Vector3(0,-1,0)},
-      uScan:{value:3.0}, uWireAmt:{value:0}, uTilt:{value:new THREE.Vector2(0,0)}
+      uTime:{value:0}, uPull:{value:0}, uCharge:{value:0}, uWaveT:{value:[9,9,9]}, uWaveAmp:{value:[0,0,0]},
+      uMag:{value:new THREE.Vector3(0,0,1)}, uWaveO:{value:[new THREE.Vector3(0,-1,0), new THREE.Vector3(0,-1,0), new THREE.Vector3(0,-1,0)]},
+      uScan:{value:3.0}, uWireAmt:{value:0}, uTilt:{value:new THREE.Vector2(0,0)}, uEnv:{value:null}, uEnvAmt:{value:1.1}, uCrack:{value:0}
     }
   });
   var ageo = new THREE.IcosahedronGeometry(1, 12);
@@ -658,6 +719,14 @@ body{
   art.frustumCulled = false; art.scale.setScalar(1.35); art.position.set(0, ART_Y, 0);
   scene.add(art);
   var U = amat.uniforms;
+  var cubeRT = null, cubeCam = null;
+  if(THREE.CubeCamera && THREE.WebGLCubeRenderTarget){
+    try{
+      cubeRT = new THREE.WebGLCubeRenderTarget(MOBILE ? 64 : 128, {type: renderer.capabilities.isWebGL2 ? THREE.HalfFloatType : THREE.UnsignedByteType, format: THREE.RGBAFormat, generateMipmaps:false, minFilter:THREE.LinearFilter, magFilter:THREE.LinearFilter});
+      cubeCam = new THREE.CubeCamera(0.3, 70, cubeRT);
+      U.uEnv.value = cubeRT.texture;
+    }catch(e){ cubeRT = null; cubeCam = null; U.uEnvAmt.value = 0; }
+  } else { U.uEnvAmt.value = 0; }
 
   /* =====================================================================
      POST: crushed blacks, drained colour, heavy vignette
@@ -721,7 +790,7 @@ body{
   var yaw = 0, pitch = 0.12;
   var keys = {};
   var joy = {id:null, sx:0, sy:0, x:0, y:0}, lk = {id:null, x:0, y:0};
-  var locked = false, dragMouse = false, lkm = {x:0, y:0};
+  var locked = false, dragMouse = false, lockFailed = false, lkm = {x:0, y:0};
   var src = {mouse:false, key:false, btn:false};
   var CIRC = [[14,14,3.0],[-14,14,3.0],[14,-14,3.0],[-14,-14,3.0],[0,0,5.0]];
   var EYE = 1.7, SPEED = 3.4, LIM = HALF - 0.6;
@@ -740,8 +809,9 @@ body{
   if(reduce) t0 = performance.now() - 9000;
   function skip(){ var t = (performance.now()-t0)/1000; if(t < T_DONE) t0 = performance.now() - (T_DONE + 0.2)*1000; }
 
-  function tryLock(){ try{ var p = cv.requestPointerLock && cv.requestPointerLock(); if(p && p.catch) p.catch(function(){}); }catch(_){} }
+  function tryLock(){ try{ var p = cv.requestPointerLock && cv.requestPointerLock(); if(p && p.catch) p.catch(function(){ lockFailed = true; }); }catch(_){ lockFailed = true; } }
   document.addEventListener('pointerlockchange', function(){ locked = (document.pointerLockElement === cv); });
+  document.addEventListener('pointerlockerror', function(){ lockFailed = true; });
   document.addEventListener('mousemove', function(e){
     if(!locked || !introDone) return;
     yaw -= (e.movementX||0)*0.0022; pitch -= (e.movementY||0)*0.0022;
@@ -759,8 +829,9 @@ body{
       } else if(lk.id === null){ lk.id = e.pointerId; lk.x = e.clientX; lk.y = e.clientY; }
       return;
     }
-    if(!locked){ tryLock(); dragMouse = true; lkm.x = e.clientX; lkm.y = e.clientY; try{ cv.setPointerCapture(e.pointerId); }catch(_){} }
-    else if(e.button === 0) src.mouse = true;
+    if(!locked && !lockFailed){ tryLock(); dragMouse = true; lkm.x = e.clientX; lkm.y = e.clientY; try{ cv.setPointerCapture(e.pointerId); }catch(_){} }
+    else if(!locked && e.button === 2){ dragMouse = true; lkm.x = e.clientX; lkm.y = e.clientY; try{ cv.setPointerCapture(e.pointerId); }catch(_){} }
+    else if(e.button === 0){ src.mouse = true; pendPress = true; }
   });
   cv.addEventListener('pointermove', function(e){
     if(e.pointerType === 'touch'){
@@ -785,34 +856,54 @@ body{
   }
   cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 
-  ringEl.addEventListener('pointerdown', function(e){ e.preventDefault(); src.btn = true; ringEl.classList.add('hold'); try{ ringEl.setPointerCapture(e.pointerId); }catch(_){} });
+  ringEl.addEventListener('pointerdown', function(e){ e.preventDefault(); src.btn = true; pendPress = true; ringEl.classList.add('hold'); try{ ringEl.setPointerCapture(e.pointerId); }catch(_){} });
   function ringUp(){ src.btn = false; ringEl.classList.remove('hold'); }
   ringEl.addEventListener('pointerup', ringUp); ringEl.addEventListener('pointercancel', ringUp);
 
   addEventListener('keydown', function(e){
     if(!introDone){ skip(); return; }
     keys[e.code] = true;
-    if(e.code === 'Space' || e.code === 'KeyE'){ src.key = true; e.preventDefault(); }
+    if(e.code === 'Space') e.preventDefault();
     if(e.code.indexOf('Arrow') === 0) e.preventDefault();
   });
-  addEventListener('keyup', function(e){ keys[e.code] = false; if(e.code === 'Space' || e.code === 'KeyE') src.key = false; });
+  addEventListener('keyup', function(e){ keys[e.code] = false; });
   addEventListener('blur', function(){ keys = {}; src.key = src.mouse = src.btn = false; ringUp(); });
 
   /* =====================================================================
      STATE
      ===================================================================== */
-  var charge = 0, pull = 0, flash = 0, waveT = 9, wasDown = false, used = false, fired = false, tArt = 0;
-  var roomT = 99, roomSpeed = 14, roomAmpBase = 0;
+  var charge = 0, pull = 0, flash = 0, pendPress = false, wasDown = false, used = false, fired = false, tArt = 0;
+  var crack = 0, cubeSlow = 0, frameN = 0;
+  // any number of waves can be in flight at once: releases never cut each other off
+  var NW = 6, NR = 3, waves = [], rip = [], gutOn = false, gutT = 99, bwA = [0,0,0,0,0,0], btA = [0,0,0,0,0,0];
+  for(var wq=0; wq<NW; wq++) waves.push({t:99, spd:14, amp:0, hot:0, mode:0, str:0, gut:false});
+  for(var rq=0; rq<NR; rq++) rip.push({t:9, a:0});
   var magT = new THREE.Vector3(0,0,1), tmp = new THREE.Vector3();
   var movedDist = 0, unlockAt = 0, hintMsg = '', fpsAcc = 0, fpsN = 0, adapt = 0;
   // rare, violent blackouts of the artifact's light
   var ST_PAT = [0.04, 0.9, 0.0, 0.55, 0.0, 1.0, 0.08, 0.0];
   var nextSt = 14 + Math.random()*10, stStart = -1, stMult = 1;
   // the artifact demonstrates the gesture on its own: it swells, then releases a faint pulse
-  var teaseT = -1, teaseFired = false, nextTease = 0;
+  var teaseT = -1, teaseFired = false, nextTease = 0, teaseBig = false, visG = 0;
   var lookAcc = 0, lastYaw = 0, lastPitch = 0.12, didLook = false, didMove = false;
 
-  function fireRoom(speed, amp, hot, mode){ roomT = 0; roomSpeed = speed; roomAmpBase = amp; WU.uHot.value = hot; WU.uMode.value = mode; }
+  function fireRoom(speed, amp, hot, mode, str, gut){
+    var w = waves[0];
+    for(var i=1; i<NW; i++) if(waves[i].t > w.t) w = waves[i];   // reuse the oldest wave
+    w.t = 0; w.spd = speed; w.amp = amp; w.hot = hot; w.mode = mode; w.str = str || 0; w.gut = !!gut;
+    if(gut){ gutOn = true; gutT = 0; }
+  }
+  function fireRipple(o, amp){
+    var k = 0;
+    for(var i=1; i<NR; i++) if(rip[i].t > rip[k].t) k = i;
+    rip[k].t = 0; rip[k].a = amp; U.uWaveO.value[k].copy(o);
+  }
+  // a full-charge release blows the torches out; they catch again one at a time
+  function gutFac(i){
+    if(!gutOn) return 1;
+    var s0 = 0.9 + 0.55*(i%4), f = sstep(s0, s0 + 1.3, gutT);
+    return f < 1 ? f*(0.6 + 0.4*Math.sin(gutT*45 + i*2.1)) : 1;
+  }
 
   function setHint(msg){
     if(msg === hintMsg) return; hintMsg = msg;
@@ -839,7 +930,7 @@ body{
 
     if(!spawned && t >= T_SPAWN){
       spawned = true;
-      U.uWaveO.value.set(0,-1,0); U.uWaveAmp.value = 0.24; waveT = 0; flash = 1.2;
+      tmp.set(0,-1,0); fireRipple(tmp, 0.24); flash = 1.2;
       fireRoom(11, 1.0, 0, 0);
     }
     if(!introDone && t >= T_DONE){ introDone = true; unlockAt = t; }
@@ -862,15 +953,15 @@ body{
     for(var i=0;i<4;i++){
       var lv = sstep(1.0 + 0.5*i, 1.8 + 0.5*i, ts);
       tl.push(lv);
-      var f = flames[i], fl = flick(t, f.ph*2.0 + i*3.7);
-      f.mat.color.setRGB(1.0*lv*2.6*fl, 0.06*lv*2.6*fl, 0.02*lv*2.6*fl);
-      f.mesh.scale.set(1, 0.7 + 0.5*fl*lv, 1);
+      var f = flames[i], fl = flick(t, f.ph*2.0 + i*3.7)*gutFac(i);
+      f.mat.color.setRGB(1.0*lv*2.6*fl*(1 + 0.9*visG), 0.06*lv*2.6*fl*(1 + 0.9*visG), 0.02*lv*2.6*fl*(1 + 0.9*visG));
+      f.mesh.scale.set(1, (0.7 + 0.5*fl*lv)*(1 + 0.35*visG), 1);
     }
     torchLights.forEach(function(tt){
       var f = flames[tt.idx];
-      tt.light.intensity = 3.6*tl[tt.idx]*flick(t, f.ph*2.0 + tt.idx*3.7);
+      tt.light.intensity = 3.6*(1 + 0.8*visG)*tl[tt.idx]*flick(t, f.ph*2.0 + tt.idx*3.7)*gutFac(tt.idx);
     });
-    var winLv = sstep(3.4, 4.6, ts)*flick(t, 9.1);
+    var winLv = sstep(3.4, 4.6, ts)*flick(t, 9.1)*(1 + (gutOn ? 2.2*Math.exp(-gutT*2.2) : 0));
     winMat.color.setRGB(0.45*winLv*1.5, 0.72*winLv*1.5, 0.78*winLv*1.5);
     winSpot.intensity = 2.6*winLv;
     shaftMat.uniforms.uLevel.value = winLv;
@@ -879,16 +970,29 @@ body{
     /* ---- cloth, chains, column flames ---- */
     var decoLv = sstep(1.6, 2.8, ts);
     for(var bj=0; bj<banners.length; bj++){
-      var bn = banners[bj], bp = bn.geo.attributes.position;
+      var bn = banners[bj], bp = bn.geo.attributes.position, nb = 0;
+      for(var wk=0; wk<NW; wk++){
+        var ww = waves[wk], bt = ww.t - bn.d/ww.spd;
+        if(ww.str > 0.05 && bt > 0){ var bwv = ww.str*Math.exp(-bt*0.9); if(bwv > 0.002){ bwA[nb] = bwv; btA[nb] = bt; nb++; } }
+      }
       for(var vi=0; vi<bp.count; vi++){
-        var fy = clamp01((3 - bn.oy[vi])/6);
-        bp.setZ(vi, bn.oz[vi] + Math.sin(t*0.9 + bn.oy[vi]*0.9 + bn.ph)*0.18*fy);
+        var fy = clamp01((3 - bn.oy[vi])/6), badd = 0;
+        for(var bq=0; bq<nb; bq++) badd += bwA[bq]*1.15*fy*(0.5 + 0.5*Math.sin(btA[bq]*8.0 - bn.oy[vi]*1.3));
+        bp.setZ(vi, bn.oz[vi] + Math.sin(t*0.9 + bn.oy[vi]*0.9 + bn.ph)*0.18*fy + Math.min(badd, 1.9));
       }
       bp.needsUpdate = true;
     }
-    for(var cj=0; cj<chains.length; cj++){ var ch = chains[cj]; ch.group.rotation.z = 0.025*Math.sin(t*0.4 + ch.ph); ch.group.rotation.x = 0.02*Math.sin(t*0.33 + ch.ph*2.0); }
-    for(var hj=0; hj<hang.length; hj++){ var hh = hang[hj], hv = flick(t, hh.ph*2.0 + 11.0)*decoLv; hh.mat.color.setRGB(1.0*hv*1.8, 0.05*hv*1.8, 0.02*hv*1.8); hh.mesh.scale.y = 0.7 + 0.5*hv; }
-    for(var sj=0; sj<sconces.length; sj++){ var sc = sconces[sj], sv = flick(t, sc.ph*2.0 + 5.0)*decoLv; sc.mat.color.setRGB(1.0*sv*2.2, 0.05*sv*2.2, 0.02*sv*2.2); sc.mesh.scale.y = 0.7 + 0.5*sv; if(sc.light) sc.light.intensity = 2.4*sv; }
+    for(var cj=0; cj<chains.length; cj++){
+      var ch = chains[cj], csw = 0;
+      for(var ck=0; ck<NW; ck++){
+        var cw = waves[ck], ctc = cw.t - ch.d/cw.spd;
+        if(cw.str > 0.05 && ctc > 0) csw += cw.str*0.42*Math.exp(-ctc*0.55)*Math.sin(ctc*3.3);
+      }
+      csw = Math.max(-0.7, Math.min(0.7, csw));
+      ch.group.rotation.z = 0.025*Math.sin(t*0.4 + ch.ph) + ch.ux*csw; ch.group.rotation.x = 0.02*Math.sin(t*0.33 + ch.ph*2.0) - ch.uz*csw;
+    }
+    for(var hj=0; hj<hang.length; hj++){ var hh = hang[hj], hv = flick(t, hh.ph*2.0 + 11.0)*decoLv*gutFac(hj); hh.mat.color.setRGB(1.0*hv*1.8, 0.05*hv*1.8, 0.02*hv*1.8); hh.mesh.scale.y = 0.7 + 0.5*hv; }
+    for(var sj=0; sj<sconces.length; sj++){ var sc = sconces[sj], sv = flick(t, sc.ph*2.0 + 5.0)*decoLv*gutFac(sj); sc.mat.color.setRGB(1.0*sv*2.2*(1 + 0.9*visG), 0.05*sv*2.2*(1 + 0.9*visG), 0.02*sv*2.2*(1 + 0.9*visG)); sc.mesh.scale.y = (0.7 + 0.5*sv)*(1 + 0.35*visG); if(sc.light) sc.light.intensity = 2.4*sv*(1 + 0.8*visG); }
 
     /* ---- player ---- */
     if(introDone){
@@ -907,6 +1011,19 @@ body{
     var introPush = reduce ? 1 : ease(t/T_SPAWN);
     camera.position.set(player.x, EYE, player.z + (introDone ? 0 : 1.8*(1 - introPush)));
     camera.rotation.set(pitch, yaw, 0);
+    var shk = 0, kk = 0;
+    for(var sk=0; sk<NW; sk++){
+      var sw2 = waves[sk];
+      if(sw2.str > 0.4 && sw2.t < 2.5) shk = Math.max(shk, sw2.str*Math.exp(-sw2.t*3.0));
+      if(sw2.str > 0.3 && sw2.t < 1.5) kk = Math.max(kk, sw2.str*Math.min(1, sw2.t/0.05)*Math.exp(-sw2.t*4.5));
+    }
+    var smag = shk*0.09 + charge*charge*0.003;
+    if(smag > 0.0001){
+      camera.position.x += (Math.random()-0.5)*smag; camera.position.y += (Math.random()-0.5)*smag;
+      camera.rotation.z = (Math.random()-0.5)*(shk*0.02 + charge*charge*0.0008);
+    }
+    var fvv = baseFov + 11*kk;
+    if(Math.abs(fvv - lastFov) > 0.01){ camera.fov = fvv; camera.updateProjectionMatrix(); lastFov = fvv; }
 
     /* ---- the artifact notices you ---- */
     tmp.set(player.x - art.position.x, EYE - art.position.y, player.z - art.position.z);
@@ -920,51 +1037,71 @@ body{
       if(teaseT < 0 && t > unlockAt + 6 && t > nextTease) teaseT = 0;
       if(teaseT >= 0){
         teaseT += dt;
-        tease = sstep(0, 1.3, teaseT)*(1 - sstep(1.5, 1.7, teaseT));
-        if(!teaseFired && teaseT >= 1.6){
+        var sw = teaseBig ? 2.8 : 1.3;
+        tease = sstep(0, sw, teaseT)*(1 - sstep(sw + 0.2, sw + 0.4, teaseT));
+        if(!teaseFired && teaseT >= sw + 0.3){
           teaseFired = true;
-          U.uWaveO.value.copy(U.uMag.value); U.uWaveAmp.value = 0.14; waveT = 0; flash = 0.35;
-          fireRoom(15, 0.3, 0.3, 1);
+          fireRipple(U.uMag.value, teaseBig ? 0.5 : 0.14); flash = teaseBig ? 1.1 : 0.35;
+          fireRoom(15, teaseBig ? 0.95 : 0.3, teaseBig ? 0.9 : 0.3, 1, teaseBig ? 0.55 : 0.12, false);
         }
-        if(teaseT > 2.3){ teaseT = -1; teaseFired = false; nextTease = t + 9; }
+        if(teaseT > sw + 1.0){ teaseT = -1; teaseFired = false; teaseBig = !teaseBig; nextTease = t + 5; }
       }
     } else { teaseT = -1; }
 
-    var down = introDone && (src.mouse || src.key || src.btn);
+    var down = introDone && (src.mouse || src.key || src.btn || pendPress); pendPress = false;
     if(down) charge = Math.min(1, charge + dt/1.6); else charge = Math.max(0, charge - dt*2.4);
     if(wasDown && !down){
-      U.uWaveO.value.copy(U.uMag.value); U.uWaveAmp.value = 0.1 + 0.42*charge; waveT = 0; flash = 0.35 + charge;
-      fireRoom(15, 0.5 + 0.5*charge, charge, 1); used = true; fired = true;
+      fireRipple(U.uMag.value, 0.1 + 0.42*charge); flash = Math.min(2.4, flash*0.6 + 0.35 + charge);
+      var tier = charge < 0.4 ? 1 : (charge < 0.92 ? 2 : 3);
+      crack = Math.max(crack, 0.55 + 0.45*charge);
+      if(tier === 3) flash = Math.min(3.2, flash + 1.2);
+      fireRoom(tier === 3 ? 19 : (tier === 2 ? 15 : 13), tier === 3 ? 1.0 : (tier === 2 ? 0.75 : 0.4), charge, 1, tier === 3 ? 1.0 : (tier === 2 ? 0.65 : 0.2), tier === 3);
+      used = true; fired = true;
     }
     if(down) used = true;
     wasDown = down;
 
     var tp = prox*0.45 + (down ? 0.5*charge : 0) + tease*0.3;
     pull += (tp - pull)*Math.min(1, dt*5);
-    waveT += dt; if(waveT > 7) U.uWaveAmp.value = 0;
+    for(var ri=0; ri<NR; ri++){ var rr = rip[ri]; rr.t += dt; if(rr.t > 7) rr.a = 0; U.uWaveT.value[ri] = rr.t; U.uWaveAmp.value[ri] = rr.a; }
     flash *= Math.exp(-dt*2.6);
 
     tArt += dt*(1 + prox*1.2 + charge*1.5);
     U.uTime.value = tArt*(reduce ? 0.3 : 1);
-    var vis = Math.max(charge, tease*0.38);
-    U.uPull.value = pull; U.uCharge.value = vis; U.uWaveT.value = waveT;
+    var vis = Math.max(charge, tease*(teaseBig ? 0.95 : 0.38)); visG = vis;
+    U.uPull.value = pull; U.uCharge.value = vis;
+    if(vis > crack) crack += (vis - crack)*Math.min(1, dt*5); else crack = Math.max(vis, crack - dt*0.55);
+    U.uCrack.value = crack;
     art.position.y = ART_Y + 0.08*Math.sin(t*0.6);
 
     /* ---- room wave: wireframe reveal ---- */
-    roomT += dt;
-    var R = roomT*roomSpeed;
-    WU.uWaveR.value = R;
-    WU.uWaveAmp.value = roomAmpBase*(1 - sstep(30, 54, R));
-    WU.uTrail.value = 8 + 8*roomAmpBase;
+    var wBusy = false, burst = 0;
+    gutT += dt*((gutOn && gutT < 0.1) ? 0.3 : 1);
+    if(gutOn && gutT > 5) gutOn = false;
+    for(var wi=0; wi<NW; wi++){
+      var w = waves[wi];
+      w.t += dt*((w.gut && w.t < 0.1) ? 0.3 : 1);
+      if(w.t > 10) w.str = 0;
+      var R = w.t*w.spd;
+      WU.uWR.value[wi] = R;
+      WU.uWA.value[wi] = w.amp*(1 - sstep(30, 54, R));
+      WU.uWT.value[wi] = 8 + 8*w.amp;
+      WU.uWH.value[wi] = w.hot; WU.uWM.value[wi] = w.mode; WU.uWS.value[wi] = w.spd;
+      WU.uWK.value[wi] = Math.max(0, (w.str - 0.2)/0.8)*(1 - sstep(3.5, 7.0, w.t));
+      if(w.t < 6) wBusy = true;
+      if(w.str > 0.15 && w.t < 10) burst += w.str*(1 - Math.exp(-w.t*7.0))*Math.exp(-w.t*0.45);
+    }
     WU.uWaveC.value.set(art.position.x, art.position.y, art.position.z);
 
     /* ---- the sun: sickly, throbbing, and (rarely) it dies for a moment; blood red when charged ---- */
     artLight.color.setRGB(0.32 + 0.68*vis, 0.9 - 0.84*vis, 0.6 - 0.57*vis);
     var beat = Math.pow(Math.max(0, Math.sin(tArt*1.5)), 10)*0.5 + Math.pow(Math.max(0, Math.sin(tArt*1.5 - 0.75)), 10)*0.3;
-    artLight.intensity = (1.9 + 0.6*Math.sin(tArt*0.7) + 1.7*vis + 2.4*flash)*(1 + 0.5*beat)*stMult*artLv;
+    artLight.intensity = (1.9 + 0.6*Math.sin(tArt*0.7) + 1.7*vis + 1.0*crack + 2.4*flash)*(1 + 0.5*beat)*stMult*artLv;
     artLight.position.set(0.35*Math.sin(tArt*0.45), art.position.y + 0.15*Math.sin(tArt*0.9), 0.35*Math.cos(tArt*0.38));
 
     dmat.uniforms.uTime.value = t; dmat.uniforms.uC.value.copy(art.position); dmat.uniforms.uLevel.value = artLv*(0.3 + 0.7*stMult);
+    dmat.uniforms.uAttr.value = Math.min(1, vis*1.1);
+    dmat.uniforms.uBurst.value = Math.min(1.4, burst);
 
     /* ---- hints and touch UI: charging works from anywhere in the room ---- */
     var msg = '';
@@ -979,19 +1116,34 @@ body{
     lookAcc += Math.abs(yaw - lastYaw) + Math.abs(pitch - lastPitch); lastYaw = yaw; lastPitch = pitch;
     if(lookAcc > 0.5) didLook = true;
     if(movedDist > 4) didMove = true;
-    gLookEl.classList.toggle('on', cueOn && !touchMode && !didLook);
+    gLookEl.classList.toggle('on', cueOn && !touchMode && (!didLook || !fired));
     gMoveEl.classList.toggle('on', cueOn && !touchMode && !didMove);
-    gActEl.classList.toggle('on', cueOn && !touchMode && !fired);
+    
     gJoyEl.classList.toggle('on', cueOn && touchMode && !didMove);
     gLkEl.classList.toggle('on', cueOn && touchMode && !didLook);
     kW.classList.toggle('dn', !!(keys.KeyW || keys.ArrowUp));
     kA.classList.toggle('dn', !!(keys.KeyA || keys.ArrowLeft));
     kS.classList.toggle('dn', !!(keys.KeyS || keys.ArrowDown));
     kD.classList.toggle('dn', !!(keys.KeyD || keys.ArrowRight));
-    kSp.classList.toggle('dn', !!(src.key || src.mouse));
+    mBtn.classList.toggle('dn', !!src.mouse);
     setHint('');
     ringEl.classList.toggle('on', touchMode && introDone);
     ringEl.classList.toggle('cue', !used);
+
+    /* ---- reflections: capture the hall from the artifact's centre ---- */
+    frameN++;
+    if(cubeCam && spawned && frameN > 4){
+      var busyR = (flash > 0.05 || charge > 0.02 || wBusy || tease > 0.01);
+      var every = (MOBILE ? 6 : (busyR ? 2 : 4)) + 2*cubeSlow;
+      if(frameN % every === 0){
+        art.visible = false;
+        var sau = renderer.shadowMap.autoUpdate; renderer.shadowMap.autoUpdate = false;
+        cubeCam.position.copy(art.position);
+        cubeCam.update(renderer, scene);
+        renderer.shadowMap.autoUpdate = sau;
+        art.visible = true;
+      }
+    }
 
     /* ---- adaptive quality ---- */
     if(t > 3){
@@ -999,7 +1151,7 @@ body{
       if(fpsAcc > 2.5){
         var ms = fpsAcc/fpsN*1000;
         if(ms > 24 && adapt < 3){
-          adapt++; qW = Math.max(360, qW*0.8); applyRes();
+          adapt++; cubeSlow = adapt; qW = Math.max(360, qW*0.8); applyRes();
           if(adapt >= 2 && bloom) bloom.enabled = false;
         }
         fpsAcc = 0; fpsN = 0;
