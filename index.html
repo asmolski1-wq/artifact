@@ -3,10 +3,28 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Witam, witam</title>
+<title>entity_001</title>
+<meta name="description" content="A dark hall. One thing in it is awake.">
+<meta name="theme-color" content="#000000">
+<meta name="color-scheme" content="dark">
+<!-- Once hosted, make og:image / twitter:image absolute (https://your.domain/share.jpg): crawlers ignore relative paths. -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="entity_001">
+<meta property="og:description" content="A dark hall. One thing in it is awake.">
+<meta property="https://raw.githubusercontent.com/mentalny-bialystok/artifact/refs/heads/main/share.jpg" content="share.jpg">
+<meta property="https://raw.githubusercontent.com/mentalny-bialystok/artifact/refs/heads/main/share.jpg:width" content="1200">
+<meta property="https://raw.githubusercontent.com/mentalny-bialystok/artifact/refs/heads/main/share.jpg:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:title" content="entity_001">
+<meta name="twitter:description" content="A dark hall. One thing in it is awake.">
+<meta name="https://raw.githubusercontent.com/mentalny-bialystok/artifact/refs/heads/main/share.jpg" content="share.jpg">
+<link id="fav" rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%27%20viewBox%3D%270%200%2064%2064%27%3E%3Cdefs%3E%3CradialGradient%20id%3D%27g%27%20cx%3D%27.36%27%20cy%3D%27.3%27%20r%3D%27.8%27%3E%3Cstop%20offset%3D%270%27%20stop-color%3D%27%23f2fbf7%27%2F%3E%3Cstop%20offset%3D%27.42%27%20stop-color%3D%27%236f8f86%27%2F%3E%3Cstop%20offset%3D%271%27%20stop-color%3D%27%230a1411%27%2F%3E%3C%2FradialGradient%3E%3C%2Fdefs%3E%3Crect%20width%3D%2764%27%20height%3D%2764%27%20rx%3D%2714%27%20fill%3D%27%23020403%27%2F%3E%3Cpath%20d%3D%27M32%208c11%200%2022%207%2023%2021S47%2055%2033%2056%209%2047%209%2033%2020%208%2032%208z%27%20fill%3D%27url%28%23g%29%27%2F%3E%3Cpath%20d%3D%27M23%2017l8%209-5%208%209%209%27%20stroke%3D%27%23ff2a1e%27%20stroke-width%3D%272.8%27%20fill%3D%27none%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%2F%3E%3C%2Fsvg%3E">
+<link rel="apple-touch-icon" href="icon-180.png">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com">
+<link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500&display=swap" rel="stylesheet" media="print" onload="this.media='all'">
 <style>
 :root{
   color-scheme: dark;
@@ -74,10 +92,23 @@ body{
 .glook i{ position:absolute; top:50%; left:7px; width:18px; height:18px; margin-top:-9px; border-radius:50%; background:rgba(57,255,122,.25); border:1px solid rgba(57,255,122,.5); animation:gl 2.8s ease-in-out infinite; }
 @keyframes gl{ 0%,100%{ transform:translateX(0); } 50%{ transform:translateX(56px); } }
 #fail{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:2rem; text-align:center; color:var(--ink-dim); }
+/* instant atmosphere: painted from CSS alone, before a single script has arrived */
+#veil{ position:fixed; inset:0; z-index:6; background:#000; pointer-events:none; overflow:hidden; transition:opacity 2.4s ease .15s; }
+#veil.off{ opacity:0; }
+#veil i{ position:absolute; display:block; opacity:0; animation:vin 1.6s ease forwards; }
+@keyframes vin{ to{ opacity:1; } }
+#veil .vf{ inset:0; background:radial-gradient(ellipse 55% 50% at 50% 60%, rgba(40,110,80,.20), rgba(0,0,0,0) 72%), radial-gradient(ellipse 130% 60% at 50% 118%, rgba(50,120,90,.20), rgba(0,0,0,0) 62%), radial-gradient(ellipse 90% 90% at 50% 50%, rgba(0,0,0,0) 40%, #000 100%); }
+#veil .vs{ left:50%; top:19%; width:46vh; height:46vh; margin-left:-23vh; background:linear-gradient(rgba(159,216,220,.14), rgba(159,216,220,0)); clip-path:polygon(43% 0, 57% 0, 100% 100%, 0 100%); animation-delay:.25s; }
+#veil .vw{ left:50%; top:9%; width:3.4vh; height:10.5vh; margin-left:-1.7vh; border-radius:50% 50% 0 0 / 28% 28% 0 0; background:linear-gradient(#bfe9ec, rgba(159,216,220,.35)); box-shadow:0 0 5vh rgba(159,216,220,.30); animation:vin 1.8s ease .1s forwards, vflick 5s steps(1) 2s infinite; }
+@keyframes vflick{ 0%,100%{ filter:none; } 93%{ filter:brightness(.25); } 95%{ filter:brightness(1); } 97%{ filter:brightness(.4); } }
+#veil .vo{ left:50%; top:60%; width:2.2vh; height:2.2vh; margin:-1.1vh 0 0 -1.1vh; border-radius:50%; background:radial-gradient(circle, rgba(255,70,50,.9), rgba(255,42,30,0) 70%); box-shadow:0 0 4vh rgba(255,42,30,.35); animation:vin 1.4s ease .6s forwards, vbeat 2.6s ease-in-out 2s infinite; }
+@keyframes vbeat{ 0%,100%{ transform:scale(1); opacity:.55; } 50%{ transform:scale(1.5); opacity:1; } }
+@media (prefers-reduced-motion: reduce){ #veil i{ animation-duration:.01s !important; animation-iteration-count:1 !important; } }
 </style>
 </head>
 <body>
 <div id="stage"></div>
+<div id="veil" aria-hidden="true"><i class="vf"></i><i class="vs"></i><i class="vw"></i><i class="vo"></i></div>
 <div class="joy" id="joy"><i id="knob"></i></div>
 <div class="ring" id="ring"></div>
 <div class="hint" id="hint"></div>
@@ -90,22 +121,23 @@ body{
 <div class="glook cue" id="gLk"><i></i></div>
 <div id="fail">This piece needs WebGL, which this browser isn’t offering.</div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/CopyShader.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/shaders/LuminosityHighPassShader.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/EffectComposer.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/RenderPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/ShaderPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/MaskPass.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/postprocessing/UnrealBloomPass.js"></script>
 <script>
-(function(){
+document.addEventListener('DOMContentLoaded', function(){
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage = document.getElementById('stage');
   var hintEl = document.getElementById('hint'), joyEl = document.getElementById('joy'), knobEl = document.getElementById('knob'), ringEl = document.getElementById('ring');
   var gLookEl = document.getElementById('gLook'), gMoveEl = document.getElementById('gMove'), gJoyEl = document.getElementById('gJoy'), gLkEl = document.getElementById('gLk');
   var kW = document.getElementById('kW'), kA = document.getElementById('kA'), kS = document.getElementById('kS'), kD = document.getElementById('kD'), mBtn = document.getElementById('mBtn');
-  function fail(){ document.getElementById('fail').style.display='flex'; hintEl.style.display='none'; }
+  var veilEl = document.getElementById('veil'), veilGone = false, userSkipped = false, started = false;
+  function fail(){ document.getElementById('fail').style.display='flex'; hintEl.style.display='none'; if(veilEl) veilEl.style.display='none'; }
   if(!window.THREE){ fail(); return; }
 
   /* ---------- device profile ---------- */
@@ -163,18 +195,31 @@ body{
      SHARED WAVE STATE: the shockwave that turns the room into wireframe
      ===================================================================== */
   var WU = {
-    uWaveC:{value:new THREE.Vector3(0,3.6,0)},
+    uWC:{value:[new THREE.Vector3(0,3.6,0), new THREE.Vector3(0,3.6,0), new THREE.Vector3(0,3.6,0), new THREE.Vector3(0,3.6,0), new THREE.Vector3(0,3.6,0), new THREE.Vector3(0,3.6,0)]},
     uWR:{value:[0,0,0,0,0,0]}, uWA:{value:[0,0,0,0,0,0]}, uWT:{value:[10,10,10,10,10,10]}, uWH:{value:[0,0,0,0,0,0]},
     uWM:{value:[0,0,0,0,0,0]}, uWK:{value:[0,0,0,0,0,0]}, uWS:{value:[15,15,15,15,15,15]}
   };
   var WIRE_FRAG = [
     '{',
-    ' float dd = length(vWPos - uWaveC);',
     ' float wm = min(min(vB.x, vB.y), vB.z);',
     ' float fw = fwidth(wm);',
     ' float wire = 1.0 - smoothstep(fw*0.6, fw*1.7, wm);',
+    // the surfaces themselves ripple as a wave passes: grid lines wobble, light and dark bands travel with the front
+    ' vec3 rv = vec3(0.0); float rb = 0.0;',
+    ' for(int ri = 0; ri < 6; ri++){',
+    '  float ra = uWA[ri];',
+    '  if(ra > 0.0005){',
+    '   vec3 dv = vWPos - uWC[ri]; float dl = max(length(dv), 0.001);',
+    '   float q = dl - uWR[ri];',
+    '   float env = exp(-q*q*0.045)*ra;',
+    '   rv += dv/dl*(env*sin(q*1.7));',
+    '   rb += env*cos(q*1.7);',
+    '  }',
+    ' }',
     ' vec3 wn = abs(normalize(cross(dFdx(vWPos), dFdy(vWPos))));',
-    ' vec2 guv = (wn.y > max(wn.x, wn.z)) ? vWPos.xz : ((wn.x > wn.z) ? vWPos.zy : vWPos.xy);',
+    ' bool onY = wn.y > max(wn.x, wn.z); bool onX = wn.x > wn.z;',
+    ' vec2 rp = onY ? rv.xz : (onX ? rv.zy : rv.xy);',
+    ' vec2 guv = (onY ? vWPos.xz : (onX ? vWPos.zy : vWPos.xy)) + rp*0.4;',
     ' vec2 gq = guv/1.6;',
     ' vec2 gw = fwidth(gq);',
     ' vec2 gl = abs(fract(gq - 0.5) - 0.5)/max(gw, vec2(0.0005));',
@@ -183,7 +228,7 @@ body{
     ' for(int wi = 0; wi < 6; wi++){',
     '  float wa = uWA[wi];',
     '  if(wa > 0.0005){',
-    '   float fr = dd - uWR[wi];',
+    '   float fr = length(vWPos - uWC[wi]) - uWR[wi];',
     '   float ahead = smoothstep(0.9, 0.0, fr);',
     '   float behind = smoothstep(-uWT[wi], -0.4, fr);',
     '   float zone = ahead*behind*wa;',
@@ -195,17 +240,16 @@ body{
     '   wadd += wc*pat*(zone*1.8 + lead*2.2) + wc*lead*mix(0.1, 0.3, md);',
     '  }',
     ' }',
-    ' gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - dark) + min(wadd, vec3(3.2));',
+    ' gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - dark)*(1.0 + 0.4*clamp(rb, -1.5, 1.5)) + min(wadd, vec3(3.2));',
     '}'
   ].join('\n');
   var HEAT_FRAG = [
     '{',
-    ' float hd = length(vWPos - uWaveC);',
     ' vec3 hadd = vec3(0.0);',
     ' for(int hi = 0; hi < 6; hi++){',
     '  float kq = uWK[hi];',
     '  if(kq > 0.001){',
-    '   float dl = uWR[hi] - hd;',
+    '   float dl = uWR[hi] - length(vWPos - uWC[hi]);',
     '   float hk = kq*step(0.0, dl)*exp(-max(dl, 0.0)/(uWS[hi]*1.8))*smoothstep(0.0, 0.6, dl);',
     '   hadd += mix(vec3(1.0,0.1,0.02), vec3(1.0,0.5,0.12), hk)*hk*(1.5 + 1.0*uWH[hi]);',
     '  }',
@@ -221,7 +265,7 @@ body{
         .replace('#include <common>', '#include <common>\nattribute vec3 aB; varying vec3 vB; varying vec3 vWPos;')
         .replace('#include <begin_vertex>', '#include <begin_vertex>\nvB = aB; vWPos = (modelMatrix*vec4(transformed,1.0)).xyz;');
       sh.fragmentShader = sh.fragmentShader
-        .replace('#include <common>', '#include <common>\nuniform vec3 uWaveC; uniform float uWR[6]; uniform float uWA[6]; uniform float uWT[6]; uniform float uWH[6]; uniform float uWM[6]; uniform float uWK[6]; uniform float uWS[6];\nvarying vec3 vB; varying vec3 vWPos;')
+        .replace('#include <common>', '#include <common>\nuniform vec3 uWC[6]; uniform float uWR[6]; uniform float uWA[6]; uniform float uWT[6]; uniform float uWH[6]; uniform float uWM[6]; uniform float uWK[6]; uniform float uWS[6];\nvarying vec3 vB; varying vec3 vWPos;')
         .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + WIRE_FRAG + (heat ? HEAT_FRAG : ''));
     };
     return m;
@@ -492,9 +536,9 @@ body{
   var shaftLen = shaftA.distanceTo(shaftB);
   var shaftMat = new THREE.ShaderMaterial({
     transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, fog:false,
-    uniforms:{ uLevel:{value:0}, uH:{value:shaftLen} },
-    vertexShader:'uniform float uH; varying vec3 vN; varying vec3 vV; varying float vT; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); vT = (position.y + uH*0.5)/uH; gl_Position = projectionMatrix*mv; }',
-    fragmentShader:'varying vec3 vN; varying vec3 vV; varying float vT; uniform float uLevel; void main(){ float e = pow(abs(dot(normalize(vN), normalize(vV))), 1.6); float a = e*(0.015 + 0.09*vT*vT)*smoothstep(0.0,0.14,vT)*uLevel; gl_FragColor = vec4(vec3(0.55,0.85,0.9)*a, a); }'
+    uniforms:{ uLevel:{value:0}, uH:{value:shaftLen}, uRip:{value:0}, uT:{value:0} },
+    vertexShader:'uniform float uH; uniform float uRip; uniform float uT; varying vec3 vN; varying vec3 vV; varying float vT; void main(){ vec3 pp = position + normal*(uRip*0.5*sin(position.y*2.2 - uT*13.0)); vec4 mv = modelViewMatrix*vec4(pp,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); vT = (position.y + uH*0.5)/uH; gl_Position = projectionMatrix*mv; }',
+    fragmentShader:'varying vec3 vN; varying vec3 vV; varying float vT; uniform float uLevel; uniform float uRip; uniform float uT; void main(){ float e = pow(abs(dot(normalize(vN), normalize(vV))), 1.6); float a = e*(0.015 + 0.09*vT*vT)*smoothstep(0.0,0.14,vT)*uLevel*(1.0 + 2.2*uRip + 0.8*uRip*sin(vT*34.0 - uT*16.0)); gl_FragColor = vec4(vec3(0.55,0.85,0.9)*a, a); }'
   });
   var shaft = new THREE.Mesh(new THREE.ConeGeometry(5.0, shaftLen, 48, 1, true), shaftMat);
   shaft.position.copy(shaftA).add(shaftB).multiplyScalar(0.5);
@@ -523,9 +567,9 @@ body{
   dgeo.setAttribute('aSeed', new THREE.BufferAttribute(dseed,1));
   var dmat = new THREE.ShaderMaterial({
     transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
-    uniforms:{ uTime:{value:0}, uC:{value:new THREE.Vector3(0,3.6,0)}, uLevel:{value:0}, uSize:{value:30}, uAttr:{value:0}, uBurst:{value:0} },
+    uniforms:{ uTime:{value:0}, uC:{value:new THREE.Vector3(0,3.6,0)}, uLevel:{value:0}, uSize:{value:30}, uAttr:{value:0}, uBurst:{value:0}, uWC:WU.uWC, uWR:WU.uWR, uWA:WU.uWA },
     vertexShader:[
-      'uniform float uTime; uniform vec3 uC; uniform float uLevel; uniform float uSize; uniform float uAttr; uniform float uBurst; attribute float aSeed; varying float vA;',
+      'uniform float uTime; uniform vec3 uC; uniform float uLevel; uniform float uSize; uniform float uAttr; uniform float uBurst; uniform vec3 uWC[6]; uniform float uWR[6]; uniform float uWA[6]; attribute float aSeed; varying float vA;',
       'void main(){',
       ' vec3 p = position;',
       ' p.x += sin(uTime*0.07 + aSeed*3.1)*1.6 + sin(uTime*0.21 + aSeed)*0.4;',
@@ -534,8 +578,11 @@ body{
       ' vec3 dr = p - uC; float dl = max(length(dr), 0.001); vec3 nd = dr/dl;',
       ' p = uC + dr*(1.0 - 0.55*uAttr);',
       ' p += nd*uBurst*(2.5 + 5.0*fract(aSeed*7.13))*smoothstep(26.0, 1.0, dl);',
+      ' float rp = 0.0;',
+      ' for(int wi = 0; wi < 6; wi++){ float q = length(p - uWC[wi]) - uWR[wi]; rp += uWA[wi]*exp(-q*q*0.08); }',
+      ' p += nd*rp*(1.0 + 1.6*fract(aSeed*3.7));',
       ' float d = length(p - uC);',
-      ' vA = (smoothstep(14.0, 1.5, d)*0.6 + 0.015)*uLevel*(0.55 + 0.45*sin(uTime*1.3 + aSeed*5.0))*(1.0 + 0.8*uAttr + 0.8*uBurst);',
+      ' vA = (smoothstep(14.0, 1.5, d)*0.6 + 0.015)*uLevel*(0.55 + 0.45*sin(uTime*1.3 + aSeed*5.0))*(1.0 + 0.8*uAttr + 0.8*uBurst + 2.2*rp);',
       ' vec4 mv = modelViewMatrix*vec4(p,1.0);',
       ' gl_PointSize = uSize/max(0.5, -mv.z);',
       ' gl_Position = projectionMatrix*mv; }'
@@ -807,7 +854,7 @@ body{
   var T_WIRE = 0.5, T_SCAN0 = 1.5, T_SPAWN = 4.3, T_DONE = 6.8;
   var t0 = performance.now(), introDone = false, spawned = false;
   if(reduce) t0 = performance.now() - 9000;
-  function skip(){ var t = (performance.now()-t0)/1000; if(t < T_DONE) t0 = performance.now() - (T_DONE + 0.2)*1000; }
+  function skip(){ userSkipped = true; var t = (performance.now()-t0)/1000; if(t < T_DONE) t0 = performance.now() - (T_DONE + 0.2)*1000; }
 
   function tryLock(){ try{ var p = cv.requestPointerLock && cv.requestPointerLock(); if(p && p.catch) p.catch(function(){ lockFailed = true; }); }catch(_){ lockFailed = true; } }
   document.addEventListener('pointerlockchange', function(){ locked = (document.pointerLockElement === cv); });
@@ -876,7 +923,7 @@ body{
   var crack = 0, cubeSlow = 0, frameN = 0;
   // any number of waves can be in flight at once: releases never cut each other off
   var NW = 6, NR = 3, waves = [], rip = [], gutOn = false, gutT = 99, bwA = [0,0,0,0,0,0], btA = [0,0,0,0,0,0];
-  for(var wq=0; wq<NW; wq++) waves.push({t:99, spd:14, amp:0, hot:0, mode:0, str:0, gut:false});
+  for(var wq=0; wq<NW; wq++) waves.push({t:99, spd:14, amp:0, hot:0, mode:0, str:0, gut:false, c:new THREE.Vector3(0,3.6,0)});
   for(var rq=0; rq<NR; rq++) rip.push({t:9, a:0});
   var magT = new THREE.Vector3(0,0,1), tmp = new THREE.Vector3();
   var movedDist = 0, unlockAt = 0, hintMsg = '', fpsAcc = 0, fpsN = 0, adapt = 0;
@@ -890,7 +937,7 @@ body{
   function fireRoom(speed, amp, hot, mode, str, gut){
     var w = waves[0];
     for(var i=1; i<NW; i++) if(waves[i].t > w.t) w = waves[i];   // reuse the oldest wave
-    w.t = 0; w.spd = speed; w.amp = amp; w.hot = hot; w.mode = mode; w.str = str || 0; w.gut = !!gut;
+    w.t = 0; w.spd = speed; w.amp = amp; w.hot = hot; w.mode = mode; w.str = str || 0; w.gut = !!gut; w.c.copy(art.position);
     if(gut){ gutOn = true; gutT = 0; }
   }
   function fireRipple(o, amp){
@@ -905,6 +952,13 @@ body{
     return f < 1 ? f*(0.6 + 0.4*Math.sin(gutT*45 + i*2.1)) : 1;
   }
 
+  var SHV = new THREE.Vector3(0, 8, -16), shRip = 0;
+  /* the tab itself: a red favicon after a full release, a different title when you look away */
+  var favEl = document.getElementById('fav'), FAV_A = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><radialGradient id='g' cx='.36' cy='.3' r='.8'><stop offset='0' stop-color='#f2fbf7'/><stop offset='.42' stop-color='#6f8f86'/><stop offset='1' stop-color='#0a1411'/></radialGradient></defs><rect width='64' height='64' rx='14' fill='#020403'/><path d='M32 8c11 0 22 7 23 21S47 55 33 56 9 47 9 33 20 8 32 8z' fill='url(#g)'/><path d='M23 17l8 9-5 8 9 9' stroke='#ff2a1e' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>", FAV_B = "<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><defs><radialGradient id='g' cx='.36' cy='.3' r='.8'><stop offset='0' stop-color='#ffb09a'/><stop offset='.42' stop-color='#b3150d'/><stop offset='1' stop-color='#1d0302'/></radialGradient></defs><rect width='64' height='64' rx='14' fill='#050101'/><path d='M32 8c11 0 22 7 23 21S47 55 33 56 9 47 9 33 20 8 32 8z' fill='url(#g)'/><path d='M23 17l8 9-5 8 9 9' stroke='#ffe9e2' stroke-width='2.8' fill='none' stroke-linecap='round' stroke-linejoin='round'/></svg>", favTimer = 0;
+  function favHref(sv){ return 'data:image/svg+xml,' + encodeURIComponent(sv); }
+  function flashFav(){ if(!favEl) return; favEl.href = favHref(FAV_B); clearTimeout(favTimer); favTimer = setTimeout(function(){ favEl.href = favHref(FAV_A); }, 3400); }
+  document.addEventListener('visibilitychange', function(){ document.title = document.hidden ? 'still here' : 'entity_001'; });
+
   function setHint(msg){
     if(msg === hintMsg) return; hintMsg = msg;
     if(!msg){ hintEl.classList.remove('on'); return; }
@@ -917,6 +971,7 @@ body{
   var last = t0;
   function frame(now){
     requestAnimationFrame(frame);
+    if(!started){ started = true; if(!userSkipped && !reduce) t0 = now; last = now; }   // the intro starts when the first frame does, not while shaders compile
     var dt = Math.min(0.05, (now-last)/1000); last = now;
     var t = (now - t0)/1000;
 
@@ -961,7 +1016,7 @@ body{
       var f = flames[tt.idx];
       tt.light.intensity = 3.6*(1 + 0.8*visG)*tl[tt.idx]*flick(t, f.ph*2.0 + tt.idx*3.7)*gutFac(tt.idx);
     });
-    var winLv = sstep(3.4, 4.6, ts)*flick(t, 9.1)*(1 + (gutOn ? 2.2*Math.exp(-gutT*2.2) : 0));
+    var winLv = sstep(3.4, 4.6, ts)*flick(t, 9.1)*(1 + (gutOn ? 2.2*Math.exp(-gutT*2.2) : 0))*(1 + 0.5*shRip);
     winMat.color.setRGB(0.45*winLv*1.5, 0.72*winLv*1.5, 0.78*winLv*1.5);
     winSpot.intensity = 2.6*winLv;
     shaftMat.uniforms.uLevel.value = winLv;
@@ -1057,6 +1112,7 @@ body{
       if(tier === 3) flash = Math.min(3.2, flash + 1.2);
       fireRoom(tier === 3 ? 19 : (tier === 2 ? 15 : 13), tier === 3 ? 1.0 : (tier === 2 ? 0.75 : 0.4), charge, 1, tier === 3 ? 1.0 : (tier === 2 ? 0.65 : 0.2), tier === 3);
       used = true; fired = true;
+      if(tier === 3) flashFav();
     }
     if(down) used = true;
     wasDown = down;
@@ -1075,7 +1131,7 @@ body{
     art.position.y = ART_Y + 0.08*Math.sin(t*0.6);
 
     /* ---- room wave: wireframe reveal ---- */
-    var wBusy = false, burst = 0;
+    var wBusy = false, burst = 0; shRip = 0;
     gutT += dt*((gutOn && gutT < 0.1) ? 0.3 : 1);
     if(gutOn && gutT > 5) gutOn = false;
     for(var wi=0; wi<NW; wi++){
@@ -1083,15 +1139,17 @@ body{
       w.t += dt*((w.gut && w.t < 0.1) ? 0.3 : 1);
       if(w.t > 10) w.str = 0;
       var R = w.t*w.spd;
-      WU.uWR.value[wi] = R;
+      WU.uWR.value[wi] = R; WU.uWC.value[wi].copy(w.c);
       WU.uWA.value[wi] = w.amp*(1 - sstep(30, 54, R));
       WU.uWT.value[wi] = 8 + 8*w.amp;
       WU.uWH.value[wi] = w.hot; WU.uWM.value[wi] = w.mode; WU.uWS.value[wi] = w.spd;
       WU.uWK.value[wi] = Math.max(0, (w.str - 0.2)/0.8)*(1 - sstep(3.5, 7.0, w.t));
       if(w.t < 6) wBusy = true;
+      if(w.amp > 0.01) shRip += w.amp*(1 - sstep(30, 54, R))*Math.exp(-Math.pow((R - w.c.distanceTo(SHV))/4.5, 2));
       if(w.str > 0.15 && w.t < 10) burst += w.str*(1 - Math.exp(-w.t*7.0))*Math.exp(-w.t*0.45);
     }
-    WU.uWaveC.value.set(art.position.x, art.position.y, art.position.z);
+    shRip = Math.min(1.6, shRip);
+    shaftMat.uniforms.uRip.value = shRip; shaftMat.uniforms.uT.value = t;
 
     /* ---- the sun: sickly, throbbing, and (rarely) it dies for a moment; blood red when charged ---- */
     artLight.color.setRGB(0.32 + 0.68*vis, 0.9 - 0.84*vis, 0.6 - 0.57*vis);
@@ -1164,9 +1222,13 @@ body{
       finalPass.uniforms.uCharge.value = charge;
       composer.render(dt);
     } else renderer.render(scene, camera);
+    if(veilEl && !veilGone){
+      veilGone = true;
+      requestAnimationFrame(function(){ veilEl.classList.add('off'); setTimeout(function(){ if(veilEl.parentNode) veilEl.parentNode.removeChild(veilEl); }, 3200); });
+    }
   }
   requestAnimationFrame(frame);
-})();
+});
 </script>
 </body>
 </html>
