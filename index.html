@@ -11,13 +11,15 @@
 :root{
   color-scheme: dark;
   --bg:#000;
-  --ink-dim:#7fa38b;
+  --ink-dim:#6f8f7a;
+  --phos:#39ff7a;
+  --blood:#ff2a1e;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px);
   padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#000; --ink-dim:#7fa38b; } }
-:root[data-theme="dark"]{ --bg:#000; --ink-dim:#7fa38b; }
+@media (prefers-color-scheme: dark){ :root:not([data-theme="light"]){ --bg:#000; --ink-dim:#6f8f7a; --phos:#39ff7a; --blood:#ff2a1e; } }
+:root[data-theme="dark"]{ --bg:#000; --ink-dim:#6f8f7a; --phos:#39ff7a; --blood:#ff2a1e; }
 html{ height:100%; scroll-padding-top:env(safe-area-inset-top,0px); }
 body{
   margin:0; height:100%; background:var(--bg); overflow:hidden; color:var(--ink-dim);
@@ -29,16 +31,60 @@ body{
 #stage canvas:focus-visible{ outline:1px solid var(--ink-dim); outline-offset:-8px; }
 .hint{
   position:fixed; left:0; right:0; bottom:calc(2rem + env(safe-area-inset-bottom,0px)); text-align:center;
-  font-size:.95rem; opacity:0; transition:opacity 1.8s ease; pointer-events:none;
+  font-size:.95rem; opacity:0; transition:opacity 1.6s ease; pointer-events:none; z-index:3; padding:0 1.5rem;
 }
-.hint.on{ opacity:1; }
-.hint.gone{ opacity:0; transition-duration:.8s; }
+.hint.on{ opacity:.6; }
+.joy{
+  position:fixed; width:110px; height:110px; margin:-55px 0 0 -55px; border-radius:50%;
+  border:1px solid rgba(57,255,122,.3); opacity:0; pointer-events:none; z-index:3; transition:opacity .25s ease;
+}
+.joy.on{ opacity:1; }
+.joy i{ position:absolute; left:50%; top:50%; width:46px; height:46px; margin:-23px 0 0 -23px; border-radius:50%; background:rgba(57,255,122,.14); border:1px solid rgba(57,255,122,.5); }
+.ring{
+  position:fixed; right:calc(1.6rem + env(safe-area-inset-right,0px)); bottom:calc(2.2rem + env(safe-area-inset-bottom,0px));
+  width:78px; height:78px; border-radius:50%; border:1.5px solid rgba(57,255,122,.55);
+  box-shadow:0 0 14px rgba(57,255,122,.2), inset 0 0 14px rgba(57,255,122,.1);
+  opacity:0; pointer-events:none; z-index:4; transition:opacity .8s ease, transform .15s ease; touch-action:none;
+}
+.ring::after{ content:""; position:absolute; left:50%; top:50%; width:10px; height:10px; margin:-5px 0 0 -5px; border-radius:50%; background:rgba(57,255,122,.7); }
+.ring.on{ opacity:.85; pointer-events:auto; }
+.ring.hold{ transform:scale(.92); border-color:rgba(255,42,30,.95); box-shadow:0 0 22px rgba(255,42,30,.5), inset 0 0 18px rgba(255,42,30,.3); }
+.ring.hold::after{ background:rgba(255,42,30,.95); }
+@keyframes ringcue{ 0%,100%{ box-shadow:0 0 14px rgba(57,255,122,.2), inset 0 0 14px rgba(57,255,122,.1); } 50%{ box-shadow:0 0 28px rgba(57,255,122,.65), inset 0 0 20px rgba(57,255,122,.3); } }
+.ring.cue:not(.hold){ animation:ringcue 2.6s ease-in-out infinite; }
+.keys{ position:fixed; left:0; right:0; bottom:calc(1.7rem + env(safe-area-inset-bottom,0px)); display:flex; justify-content:center; align-items:flex-end; gap:34px; pointer-events:none; z-index:3; }
+.cue{ opacity:0; transition:opacity 1.6s ease; }
+.cue.on{ opacity:.7; }
+.kg{ display:flex; align-items:flex-end; }
+.kw{ display:grid; grid-template-columns:repeat(3,30px); gap:4px; }
+.kw i{ display:block; }
+.keys b{ display:flex; align-items:center; justify-content:center; width:30px; height:30px; box-sizing:border-box; border:1px solid rgba(111,143,122,.55); border-radius:5px; font:500 12px "Instrument Sans", system-ui, sans-serif; color:#6f8f7a; background:rgba(0,0,0,.25); transition:background .12s ease, border-color .12s ease, color .12s ease, box-shadow .12s ease; }
+.keys b.kb{ width:128px; height:28px; }
+.keys b.dn{ background:rgba(57,255,122,.18); border-color:#39ff7a; color:#bfffd5; box-shadow:0 0 12px rgba(57,255,122,.35); }
+.keys b.kb.dn{ background:rgba(255,42,30,.2); border-color:#ff2a1e; box-shadow:0 0 14px rgba(255,42,30,.4); }
+.mouse{ color:#6f8f7a; animation:mseek 3s ease-in-out infinite; }
+@keyframes mseek{ 0%,100%{ transform:translateX(-4px) rotate(-4deg); } 50%{ transform:translateX(4px) rotate(4deg); } }
+.gjoy{ position:fixed; left:calc(2.2rem + env(safe-area-inset-left,0px)); bottom:calc(5.5rem + env(safe-area-inset-bottom,0px)); width:110px; height:110px; border-radius:50%; border:1px solid rgba(57,255,122,.3); pointer-events:none; z-index:3; }
+.gjoy i{ position:absolute; left:50%; top:50%; width:44px; height:44px; margin:-22px 0 0 -22px; border-radius:50%; background:rgba(57,255,122,.14); border:1px solid rgba(57,255,122,.5); animation:gj 3.2s ease-in-out infinite; }
+@keyframes gj{ 0%,100%{ transform:translate(0,0); } 25%{ transform:translate(0,-28px); } 50%{ transform:translate(18px,-18px); } 75%{ transform:translate(-14px,-24px); } }
+.glook{ position:fixed; right:calc(1.6rem + env(safe-area-inset-right,0px)); bottom:calc(8.4rem + env(safe-area-inset-bottom,0px)); width:92px; height:34px; border-radius:17px; border:1px solid rgba(57,255,122,.28); pointer-events:none; z-index:3; }
+.glook i{ position:absolute; top:50%; left:7px; width:18px; height:18px; margin-top:-9px; border-radius:50%; background:rgba(57,255,122,.25); border:1px solid rgba(57,255,122,.5); animation:gl 2.8s ease-in-out infinite; }
+@keyframes gl{ 0%,100%{ transform:translateX(0); } 50%{ transform:translateX(56px); } }
 #fail{ position:fixed; inset:0; display:none; align-items:center; justify-content:center; padding:2rem; text-align:center; color:var(--ink-dim); }
 </style>
 </head>
 <body>
 <div id="stage"></div>
-<div class="hint" id="hint">Press and hold</div>
+<div class="joy" id="joy"><i id="knob"></i></div>
+<div class="ring" id="ring"></div>
+<div class="hint" id="hint"></div>
+<div class="keys" id="keys">
+  <div class="kg cue" id="gLook"><svg class="mouse" viewBox="0 0 24 36" width="24" height="36"><rect x="2" y="2" width="20" height="32" rx="10" fill="none" stroke="currentColor" stroke-width="1.5"/><line x1="12" y1="2" x2="12" y2="14" stroke="currentColor" stroke-width="1.5"/></svg></div>
+  <div class="kg cue" id="gMove"><div class="kw"><i></i><b id="kW">W</b><i></i><b id="kA">A</b><b id="kS">S</b><b id="kD">D</b></div></div>
+  <div class="kg cue" id="gAct"><b class="kb" id="kSp"></b></div>
+</div>
+<div class="gjoy cue" id="gJoy"><i></i></div>
+<div class="glook cue" id="gLk"><i></i></div>
 <div id="fail">This piece needs WebGL, which this browser isn’t offering.</div>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -53,36 +99,424 @@ body{
 (function(){
   var reduce = window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches;
   var stage = document.getElementById('stage');
-  var hintEl = document.getElementById('hint');
+  var hintEl = document.getElementById('hint'), joyEl = document.getElementById('joy'), knobEl = document.getElementById('knob'), ringEl = document.getElementById('ring');
+  var gLookEl = document.getElementById('gLook'), gMoveEl = document.getElementById('gMove'), gActEl = document.getElementById('gAct'), gJoyEl = document.getElementById('gJoy'), gLkEl = document.getElementById('gLk');
+  var kW = document.getElementById('kW'), kA = document.getElementById('kA'), kS = document.getElementById('kS'), kD = document.getElementById('kD'), kSp = document.getElementById('kSp');
   function fail(){ document.getElementById('fail').style.display='flex'; hintEl.style.display='none'; }
   if(!window.THREE){ fail(); return; }
+
+  /* ---------- device profile ---------- */
+  var coarse = !!(window.matchMedia && matchMedia('(pointer: coarse)').matches);
+  var touchMode = coarse;
+  var MOBILE = coarse && Math.min(innerWidth, innerHeight) < 900;
+  var SHADOWS = !MOBILE;
+  var TORCH_LIGHTS = MOBILE ? 2 : 4;
+  var qW = MOBILE ? 520 : 960;
+  var BLOOM_BASE = MOBILE ? 0.7 : 0.9;
+  var NDUST = MOBILE ? 110 : 260;
+
+  /* ---------- room scale ---------- */
+  var HALF = 23.5, WALLS = HALF*2, H = 20;
 
   var renderer;
   try{ renderer = new THREE.WebGLRenderer({antialias:false, powerPreference:'high-performance'}); }
   catch(e){ fail(); return; }
-  // retro dial: render at roughly this many pixels wide, then upscale with hard edges
-  var TARGET_W = 720;
-  function resScale(){ return Math.min(1, TARGET_W/innerWidth); }
+  function resScale(){ return Math.min(1, qW/innerWidth); }
   var DPR = resScale();
   renderer.setPixelRatio(DPR);
   renderer.setSize(innerWidth, innerHeight);
   renderer.setClearColor(0x000000, 1);
+  if(SHADOWS){ renderer.shadowMap.enabled = true; renderer.shadowMap.type = THREE.PCFSoftShadowMap; }
   stage.appendChild(renderer.domElement);
   var cv = renderer.domElement;
   cv.tabIndex = 0;
   cv.setAttribute('role','img');
-  cv.setAttribute('aria-label','A liquid chrome form floating in darkness, slowly morphing, with green and amber light crawling across its surface. Press and hold, or hold the space bar, to charge it, then release to send a shockwave through it.');
+  cv.setAttribute('aria-label','A first-person view of a vast, almost lightless stone hall with a liquid chrome form floating over a stepped platform in the middle and a pale window far away. Walk with WASD or the left thumb, look with the mouse or by dragging, and hold space or the ring to charge the form and release to send a shockwave.');
   cv.addEventListener('contextmenu', function(e){ e.preventDefault(); });
 
   var useComposer = !!(THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass && THREE.ShaderPass);
   var scene = new THREE.Scene();
-  var camera = new THREE.PerspectiveCamera(35, innerWidth/innerHeight, 0.1, 60);
+  scene.background = new THREE.Color(0x000000);
+  scene.fog = new THREE.FogExp2(0x010302, 0.043);
+  var camera = new THREE.PerspectiveCamera(62, innerWidth/innerHeight, 0.1, 90);
+  camera.rotation.order = 'YXZ';
+  function setFov(){ camera.fov = (innerWidth/innerHeight < 1) ? 72 : 62; camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix(); }
+  setFov();
 
   function clamp01(x){ return Math.min(1, Math.max(0, x)); }
   function sstep(a,b,x){ var t = clamp01((x-a)/(b-a)); return t*t*(3-2*t); }
   function ease(t){ t = clamp01(t); return t<.5 ? 4*t*t*t : 1 - Math.pow(-2*t+2, 3)/2; }
+  // mostly steady, then rarely and violently dies: rapid stutter, near-black
+  function flick(t, s){
+    var a = Math.sin(t*13.1 + s)*Math.sin(t*5.3 + s*1.7);
+    var base = 0.9 + 0.1*a;
+    var dying = Math.sin(t*0.41 + s*3.0)*Math.sin(t*0.23 + s*1.3) > 0.975;
+    if(dying) return 0.03 + 0.97*(Math.sin(t*47.0 + s*9.0) > 0.2 ? 1.0 : 0.0)*0.5;
+    return base;
+  }
 
-  /* ---------- the form ---------- */
+  /* =====================================================================
+     SHARED WAVE STATE: the shockwave that turns the room into wireframe
+     ===================================================================== */
+  var WU = {
+    uWaveC:{value:new THREE.Vector3(0,3.6,0)},
+    uWaveR:{value:0}, uWaveAmp:{value:0}, uTrail:{value:10}, uHot:{value:0}, uMode:{value:0}
+  };
+  var WIRE_FRAG = [
+    '{',
+    ' float dd = length(vWPos - uWaveC);',
+    ' float fr = dd - uWaveR;',
+    ' float ahead = smoothstep(0.9, 0.0, fr);',
+    ' float behind = smoothstep(-uTrail, -0.4, fr);',
+    ' float zone = ahead*behind*uWaveAmp;',
+    ' float wm = min(min(vB.x, vB.y), vB.z);',
+    ' float fw = fwidth(wm);',
+    ' float wire = 1.0 - smoothstep(fw*0.6, fw*1.7, wm);',
+    ' vec3 wn = abs(normalize(cross(dFdx(vWPos), dFdy(vWPos))));',
+    ' vec2 guv = (wn.y > max(wn.x, wn.z)) ? vWPos.xz : ((wn.x > wn.z) ? vWPos.zy : vWPos.xy);',
+    ' vec2 gq = guv/1.6;',
+    ' vec2 gw = fwidth(gq);',
+    ' vec2 gl = abs(fract(gq - 0.5) - 0.5)/max(gw, vec2(0.0005));',
+    ' float grid = 1.0 - min(min(gl.x, gl.y)/1.3, 1.0);',
+    ' float pat = mix(wire, grid, uMode);',
+    ' float lead = exp(-fr*fr*1.6)*uWaveAmp;',
+    ' float sy = vWPos.y - uWaveR;',
+    ' vec3 wc = mix(vec3(0.1,1.0,0.4), vec3(1.0,0.06,0.03), uHot);',
+    ' gl_FragColor.rgb = gl_FragColor.rgb*(1.0 - mix(0.8, 0.5, uMode)*zone) + wc*pat*(zone*1.8 + lead*2.2) + wc*lead*mix(0.1, 0.3, uMode);',
+    '}'
+  ].join('\n');
+  function patch(m){
+    m.extensions = {derivatives:true};
+    m.onBeforeCompile = function(sh){
+      for(var k in WU) sh.uniforms[k] = WU[k];
+      sh.vertexShader = sh.vertexShader
+        .replace('#include <common>', '#include <common>\nattribute vec3 aB; varying vec3 vB; varying vec3 vWPos;')
+        .replace('#include <begin_vertex>', '#include <begin_vertex>\nvB = aB; vWPos = (modelMatrix*vec4(transformed,1.0)).xyz;');
+      sh.fragmentShader = sh.fragmentShader
+        .replace('#include <common>', '#include <common>\nuniform vec3 uWaveC; uniform float uWaveR; uniform float uWaveAmp; uniform float uTrail; uniform float uHot; uniform float uMode;\nvarying vec3 vB; varying vec3 vWPos;')
+        .replace('#include <dithering_fragment>', '#include <dithering_fragment>\n' + WIRE_FRAG);
+    };
+    return m;
+  }
+
+  /* =====================================================================
+     PROCEDURAL TEXTURES
+     ===================================================================== */
+  function tex(draw){
+    var s = 256, c = document.createElement('canvas'); c.width = c.height = s;
+    var x = c.getContext('2d'); draw(x, s);
+    var t = new THREE.CanvasTexture(c);
+    t.wrapS = t.wrapT = THREE.RepeatWrapping; t.magFilter = THREE.NearestFilter; t.minFilter = THREE.LinearMipmapLinearFilter; t.anisotropy = 4;
+    return t;
+  }
+  function grain(x, s, amt){
+    var id = x.getImageData(0,0,s,s), d = id.data;
+    for(var i=0;i<d.length;i+=4){ var n = (Math.random()-0.5)*amt; d[i]+=n; d[i+1]+=n; d[i+2]+=n; }
+    x.putImageData(id,0,0);
+  }
+  function grime(x, s, n){
+    for(var i=0;i<n;i++){
+      var gx = Math.random()*s, gy = Math.random()*s, r = 10 + Math.random()*40;
+      var g = x.createRadialGradient(gx,gy,0,gx,gy,r);
+      g.addColorStop(0,'rgba(4,14,10,'+(0.15+Math.random()*0.2)+')'); g.addColorStop(1,'rgba(4,14,10,0)');
+      x.fillStyle = g; x.fillRect(gx-r,gy-r,r*2,r*2);
+    }
+  }
+  function streaks(x, s, n){
+    for(var i=0;i<n;i++){
+      var sx = Math.random()*s, len = 40 + Math.random()*150;
+      x.fillStyle = 'rgba(0,0,0,'+(0.12+Math.random()*0.18)+')'; x.fillRect(sx, Math.random()*s*0.4, 1+Math.random()*3, len);
+    }
+  }
+  var stoneT = tex(function(x,s){
+    x.fillStyle = '#101514'; x.fillRect(0,0,s,s);
+    var b = s/2;
+    for(var i=0;i<2;i++) for(var j=0;j<2;j++){
+      var bx = i*b, by = j*b, sh = (Math.random()*9)|0;
+      x.fillStyle = 'rgb('+(24+sh)+','+(30+sh)+','+(28+sh)+')'; x.fillRect(bx+3,by+3,b-6,b-6);
+      x.fillStyle = 'rgba(255,255,255,.06)'; x.fillRect(bx+3,by+3,b-6,3); x.fillRect(bx+3,by+3,3,b-6);
+      x.fillStyle = 'rgba(0,0,0,.5)'; x.fillRect(bx+3,by+b-6,b-6,3); x.fillRect(bx+b-6,by+3,3,b-6);
+    }
+    streaks(x,s,7); grime(x,s,10); grain(x,s,22);
+  });
+  var metalT = tex(function(x,s){
+    x.fillStyle = '#0f1417'; x.fillRect(0,0,s,s);
+    x.fillStyle = '#192024'; x.fillRect(4,4,s-8,s-8);
+    x.fillStyle = 'rgba(0,0,0,.55)'; x.fillRect(s/2-1,0,2,s); x.fillRect(0,s/2-1,s,2);
+    var pts = [[14,14],[s-14,14],[14,s-14],[s-14,s-14],[s/2+14,14],[s/2-14,s-14],[14,s/2-14],[s-14,s/2+14]];
+    pts.forEach(function(p){ x.fillStyle='rgba(255,255,255,.12)'; x.beginPath(); x.arc(p[0],p[1],4,0,6.283); x.fill(); x.fillStyle='rgba(0,0,0,.6)'; x.beginPath(); x.arc(p[0]+1,p[1]+1,2,0,6.283); x.fill(); });
+    for(var k=0;k<26;k++){ x.strokeStyle='rgba(255,255,255,'+(0.02+Math.random()*0.04)+')'; x.beginPath(); var sx=Math.random()*s, sy=Math.random()*s; x.moveTo(sx,sy); x.lineTo(sx+(Math.random()-.5)*60, sy+(Math.random()-.5)*8); x.stroke(); }
+    streaks(x,s,5); grime(x,s,8); grain(x,s,16);
+  });
+  var floorT = tex(function(x,s){
+    x.fillStyle = '#060908'; x.fillRect(0,0,s,s);
+    var b = s/2;
+    for(var i=0;i<2;i++) for(var j=0;j<2;j++){
+      var sh = (Math.random()*8)|0;
+      x.fillStyle = 'rgb('+(14+sh)+','+(18+sh)+','+(17+sh)+')'; x.fillRect(i*b+2,j*b+2,b-4,b-4);
+      x.fillStyle='rgba(255,255,255,.04)'; x.fillRect(i*b+2,j*b+2,b-4,2);
+    }
+    for(var k=0;k<40;k++){ x.fillStyle='rgba(0,0,0,.22)'; x.fillRect(Math.random()*s, Math.random()*s, 2+Math.random()*14, 1+Math.random()*3); }
+    grime(x,s,12); grain(x,s,18);
+  });
+
+  var matStone = patch(new THREE.MeshStandardMaterial({map:stoneT, roughness:0.95, metalness:0.0, color:0x6e7d75}));
+  var matMetal = patch(new THREE.MeshStandardMaterial({map:metalT, roughness:0.88, metalness:0.06, color:0x6a797e}));
+  var floorQ = tex(function(x,s){
+    x.fillStyle = '#0a0b0a'; x.fillRect(0,0,s,s);
+    var b = s/2;
+    for(var i=0;i<2;i++) for(var j=0;j<2;j++){
+      var bx = i*b, by = j*b, sh = (Math.random()*14)|0;
+      x.fillStyle = 'rgb('+(38+sh)+','+(34+sh)+','+(31+sh)+')'; x.fillRect(bx+4,by+4,b-8,b-8);
+      x.fillStyle = 'rgba(255,235,210,.10)'; x.fillRect(bx+4,by+4,b-8,4); x.fillRect(bx+4,by+4,4,b-8);
+      x.fillStyle = 'rgba(0,0,0,.45)'; x.fillRect(bx+4,by+b-8,b-8,4); x.fillRect(bx+b-8,by+4,4,b-8);
+      x.strokeStyle = 'rgba(0,0,0,.35)'; x.lineWidth = 2; x.strokeRect(bx+14,by+14,b-28,b-28);
+    }
+    streaks(x,s,3); grime(x,s,12); grain(x,s,26);
+  });
+  var matFloor = patch(new THREE.MeshStandardMaterial({map:floorQ, roughness:1.0, metalness:0.0, color:0x78716b}));
+  var matDais  = patch(new THREE.MeshStandardMaterial({map:metalT, roughness:0.85, metalness:0.08, color:0x72867d}));
+
+  /* =====================================================================
+     GEOMETRY HELPERS
+     ===================================================================== */
+  function prep(g){
+    if(g.index) g = g.toNonIndexed();
+    var n = g.attributes.position.count, b = new Float32Array(n*3);
+    for(var i=0;i<n;i+=3){ b[i*3] = 1; b[i*3+4] = 1; b[i*3+8] = 1; }
+    g.setAttribute('aB', new THREE.BufferAttribute(b,3));
+    return g;
+  }
+  function boxG(w,h,d, sw,sh,sd, T){
+    var g = new THREE.BoxGeometry(w,h,d, sw||1, sh||1, sd||1);
+    var uv = g.attributes.uv, seen = new Uint8Array(uv.count);
+    var dims = [[d,h],[d,h],[w,d],[w,d],[w,h],[w,h]];
+    g.groups.forEach(function(gr){
+      var dm = dims[gr.materialIndex];
+      for(var j=gr.start;j<gr.start+gr.count;j++){
+        var vi = g.index.getX(j); if(seen[vi]) continue; seen[vi] = 1;
+        uv.setXY(vi, uv.getX(vi)*dm[0]/T, uv.getY(vi)*dm[1]/T);
+      }
+    });
+    return g;
+  }
+  function scaleUV(g, f){ var uv = g.attributes.uv; for(var i=0;i<uv.count;i++) uv.setXY(i, uv.getX(i)*f, uv.getY(i)*f); return g; }
+
+  var room = new THREE.Group(); scene.add(room);
+  function add(parent, g, mat, x,y,z, cast){
+    var m = new THREE.Mesh(prep(g), mat); m.position.set(x,y,z);
+    if(SHADOWS){ m.castShadow = !!cast; m.receiveShadow = true; }
+    parent.add(m); return m;
+  }
+
+  /* =====================================================================
+     THE ROOM: vast, bare, stone and iron, tall enough to lose the ceiling
+     ===================================================================== */
+  add(room, boxG(WALLS,0.6,WALLS, 32,1,32, 6), matFloor, 0,-0.3,0);
+  add(room, boxG(WALLS,0.6,WALLS, 16,1,16, 6), matMetal, 0,H+0.3,0);
+
+  [0, Math.PI/2, Math.PI, Math.PI*1.5].forEach(function(ang){
+    var g = new THREE.Group(); g.rotation.y = ang; room.add(g);
+    add(g, boxG(WALLS+2,H,1, 24,10,1, 6), matStone, 0,H/2,-HALF-0.5);
+    add(g, boxG(WALLS-0.6,2.6,0.6, 24,2,1, 4), matMetal, 0,1.3,-HALF+0.3);
+    add(g, boxG(WALLS-0.6,0.6,0.5, 24,1,1, 4), matMetal, 0,8.5,-HALF+0.25);
+    add(g, boxG(WALLS-0.6,1.8,0.9, 24,1,1, 4), matMetal, 0,H-0.9,-HALF+0.45);
+    [-17,-9,9,17].forEach(function(s){
+      add(g, boxG(1.8,H-1.8,1.0, 1,8,1, 4), matMetal, s,(H-1.8)/2,-HALF+0.5, true);
+    });
+    add(g, boxG(3.2,5,0.25, 2,4,1, 4), matMetal, 0,4.6,-HALF+0.12);
+    add(g, boxG(0.7,0.7,0.8, 1,1,1, 4), matMetal, 0,3.6,-HALF+0.6);
+  });
+
+  var sconces = [];
+  var PILLARS = [[14,14],[-14,14],[14,-14],[-14,-14]];
+  PILLARS.forEach(function(p){
+    var g = new THREE.Group(); g.position.set(p[0],0,p[1]); room.add(g);
+    add(g, boxG(4.8,1.2,4.8, 2,1,2, 4), matMetal, 0,0.6,0, true);
+    add(g, boxG(3.2,H-2.4,3.2, 2,12,2, 4), matStone, 0,H/2,0, true);
+    var s2 = add(g, boxG(3.2,H-2.4,3.2, 2,12,2, 4), matStone, 0,H/2,0, true); s2.rotation.y = Math.PI/4;
+    add(g, boxG(4.8,1.2,4.8, 2,1,2, 4), matMetal, 0,H-0.6,0, true);
+    // a flame on the face of each column, turned toward the centre
+    var dl = Math.sqrt(p[0]*p[0] + p[1]*p[1]), ux = -p[0]/dl, uz = -p[1]/dl;
+    add(g, boxG(0.5,0.5,0.5, 1,1,1, 4), matMetal, ux*2.1, 4.1, uz*2.1);
+    var sm = new THREE.MeshBasicMaterial({color:new THREE.Color(0,0,0), fog:false});
+    var sf = new THREE.Mesh(new THREE.ConeGeometry(0.26,0.85,6), sm); sf.position.set(ux*2.1, 4.8, uz*2.1); g.add(sf);
+    var srec = {mesh:sf, mat:sm, ph:Math.random()*6, light:null};
+    if(SHADOWS){ var sl = new THREE.PointLight(0xe0200a, 0, 15, 1.6); sl.position.set(p[0] + ux*2.7, 5.0, p[1] + uz*2.7); scene.add(sl); srec.light = sl; }
+    sconces.push(srec);
+  });
+
+  // the dais: three octagonal steps
+  [[4.4,0.4,0.2],[3.6,0.4,0.6],[2.8,0.4,1.0]].forEach(function(l){
+    var g = scaleUV(new THREE.CylinderGeometry(l[0],l[0]+0.12,l[1],8,2), 3);
+    var m = add(room, g, matDais, 0,l[2],0, true); m.rotation.y = Math.PI/8;
+  });
+
+  /* ---------- castle: pointed arches, banners, hanging chains ---------- */
+  function archG(w,h,t,depth){
+    var s = new THREE.Shape(), hw = w/2, k = 0.72;
+    s.moveTo(-hw,0);
+    s.quadraticCurveTo(-hw, h*k, 0, h);
+    s.quadraticCurveTo(hw, h*k, hw, 0);
+    s.lineTo(hw - t, 0);
+    var ih = h - t*1.5, ihw = hw - t;
+    s.quadraticCurveTo(ihw, ih*k, 0, ih);
+    s.quadraticCurveTo(-ihw, ih*k, -ihw, 0);
+    s.lineTo(-hw, 0);
+    var g = new THREE.ExtrudeGeometry(s, {depth:depth, bevelEnabled:false, curveSegments:12});
+    return scaleUV(g, 0.25);
+  }
+  var bannerT = (function(){
+    var c = document.createElement('canvas'); c.width = 128; c.height = 256; var x = c.getContext('2d');
+    x.fillStyle = '#2e0709'; x.fillRect(0,0,128,256);
+    for(var i=0;i<128;i+=3){ x.fillStyle = 'rgba(0,0,0,'+(0.08+Math.random()*0.12)+')'; x.fillRect(i,0,1,256); }
+    x.strokeStyle = '#5b4a24'; x.lineWidth = 4; x.strokeRect(9,9,110,238);
+    x.strokeStyle = '#6b5a2c'; x.lineWidth = 3; x.beginPath();
+    for(var a=0;a<8;a++){ var an = a*Math.PI/4 + Math.PI/8; var px = 64 + Math.cos(an)*30, py = 100 + Math.sin(an)*30; if(a===0) x.moveTo(px,py); else x.lineTo(px,py); }
+    x.closePath(); x.stroke();
+    x.beginPath(); x.moveTo(64,76); x.lineTo(80,100); x.lineTo(64,124); x.lineTo(48,100); x.closePath(); x.stroke();
+    x.fillStyle = 'rgba(0,0,0,.35)'; x.fillRect(0,0,128,256);
+    grime(x,128,6);
+    var t = new THREE.CanvasTexture(c); t.anisotropy = 4; return t;
+  })();
+  var bannerMat = new THREE.MeshStandardMaterial({map:bannerT, roughness:1, metalness:0, side:THREE.DoubleSide, color:0xa09090});
+  var banners = [];
+  [0, Math.PI/2, Math.PI, Math.PI*1.5].forEach(function(ang){
+    var g = new THREE.Group(); g.rotation.y = ang; room.add(g);
+    add(g, archG(17.4,15.6,1.2,0.7), matMetal, 0,2.6,-HALF+0.1);
+    [-13,13].forEach(function(x){
+      add(g, archG(7.4,9.2,0.9,0.7), matMetal, x,2.6,-HALF+0.1);
+      var geo = new THREE.PlaneGeometry(2.2,6,3,12);
+      var bm = new THREE.Mesh(geo, bannerMat); bm.position.set(x,7,-HALF+0.45); g.add(bm);
+      var pc = geo.attributes.position.count, oz = new Float32Array(pc), oy = new Float32Array(pc);
+      for(var q=0;q<pc;q++){ oz[q] = geo.attributes.position.getZ(q); oy[q] = geo.attributes.position.getY(q); }
+      banners.push({geo:geo, oz:oz, oy:oy, ph:Math.random()*6});
+      add(g, boxG(2.7,0.16,0.16, 1,1,1, 4), matMetal, x,10.1,-HALF+0.45);
+    });
+  });
+  var chainMat = new THREE.MeshStandardMaterial({color:0x58626c, roughness:0.8, metalness:0.1});
+  var linkGeo = new THREE.TorusGeometry(0.17,0.045,6,10); linkGeo.scale(1,1.55,1);
+  var chains = [], hang = [];
+  [[-8,-17,10,1],[8,-17,9,1],[-19,-5,11,0],[19,5,9,1],[-6,19,10,0],[6,19,12,1]].forEach(function(c){
+    var g = new THREE.Group(); g.position.set(c[0],H,c[1]); scene.add(g);
+    var n = Math.floor(c[2]/0.3), im = new THREE.InstancedMesh(linkGeo, chainMat, n), d = new THREE.Object3D();
+    for(var i=0;i<n;i++){ d.position.set(0,-i*0.3-0.15,0); d.rotation.set(0,(i%2)*Math.PI/2,0); d.updateMatrix(); im.setMatrixAt(i, d.matrix); }
+    im.frustumCulled = false; g.add(im);
+    if(c[3]){
+      var bowl = new THREE.Mesh(new THREE.CylinderGeometry(0.6,0.3,0.32,8), chainMat); bowl.position.y = -c[2]-0.2; g.add(bowl);
+      var hm = new THREE.MeshBasicMaterial({color:new THREE.Color(0,0,0), fog:false});
+      var hf = new THREE.Mesh(new THREE.ConeGeometry(0.34,1.1,6), hm); hf.position.y = -c[2]+0.5; g.add(hf);
+      hang.push({mesh:hf, mat:hm, ph:Math.random()*6});
+    }
+    chains.push({group:g, ph:Math.random()*6});
+  });
+
+  // arena floor inlays: iron bands set into the stone, no glow
+  function inlayRing(r0, r1, y){
+    var m = add(room, scaleUV(new THREE.RingGeometry(r0, r1, 8), r1*2/4), matMetal, 0,y,0);
+    m.rotation.x = -Math.PI/2; m.rotation.z = Math.PI/8; return m;
+  }
+  inlayRing(6.1, 6.9, 0.035);
+  inlayRing(9.6, 9.95, 0.03);
+  inlayRing(16.4, 17.3, 0.035);
+  for(var k=0;k<8;k++){
+    var a = k*Math.PI/4 + Math.PI/8;
+    var bar = add(room, boxG(0.55,0.07,17, 1,1,12, 4), matMetal, Math.sin(a)*15.5, 0.03, Math.cos(a)*15.5);
+    bar.rotation.y = a;
+  }
+
+  /* ---------- torches: few, far apart, blood red, and they die ---------- */
+  var TP = HALF - 0.9;
+  var TORCH = [{x:0,z:-TP},{x:TP,z:0},{x:0,z:TP},{x:-TP,z:0}];
+  var flames = [], torchLights = [];
+  TORCH.forEach(function(tp, i){
+    var fm = new THREE.MeshBasicMaterial({color:new THREE.Color(0,0,0), fog:false});
+    var f = new THREE.Mesh(new THREE.ConeGeometry(0.42,1.4,6), fm);
+    f.position.set(tp.x, 4.7, tp.z); room.add(f); flames.push({mesh:f, mat:fm, ph:Math.random()*6});
+    if(i < TORCH_LIGHTS){
+      var L = new THREE.PointLight(0xe0200a, 0, 26, 1.6);
+      L.position.set(tp.x*0.94, 5.0, tp.z*0.94); scene.add(L); torchLights.push({light:L, idx:i});
+    }
+  });
+
+  var amb = new THREE.AmbientLight(0x0c1812, 0); scene.add(amb);
+
+  /* ---------- a second, distant light: a tall pale window in the far north wall ---------- */
+  var WIN_Y = 9.5;
+  var winShape = new THREE.Shape();
+  winShape.moveTo(-1.3,0); winShape.lineTo(1.3,0); winShape.lineTo(1.3,5.2);
+  winShape.absarc(0,5.2,1.3,0,Math.PI,false); winShape.lineTo(-1.3,0);
+  var winMat = new THREE.MeshBasicMaterial({color:new THREE.Color(0,0,0), fog:false});
+  var win = new THREE.Mesh(new THREE.ShapeGeometry(winShape), winMat);
+  win.position.set(0, WIN_Y, -HALF+0.06); room.add(win);
+  var barMat = new THREE.MeshBasicMaterial({color:0x000000, fog:false});
+  var barV = new THREE.Mesh(new THREE.BoxGeometry(0.16,6.6,0.12), barMat); barV.position.set(0, WIN_Y+3.3, -HALF+0.1); room.add(barV);
+  var barH = new THREE.Mesh(new THREE.BoxGeometry(2.7,0.16,0.12), barMat); barH.position.set(0, WIN_Y+3.4, -HALF+0.1); room.add(barH);
+  var barH2 = new THREE.Mesh(new THREE.BoxGeometry(2.7,0.16,0.12), barMat); barH2.position.set(0, WIN_Y+1.5, -HALF+0.1); room.add(barH2);
+  var winSpot = new THREE.SpotLight(0x9fd8dc, 0, 46, 0.4, 0.9, 1.5);
+  winSpot.position.set(0, WIN_Y+4.2, -HALF+0.9); winSpot.target.position.set(0, 0, -10.5);
+  scene.add(winSpot); scene.add(winSpot.target);
+  // faint shaft of light through the murk
+  var shaftA = new THREE.Vector3(0, WIN_Y+4.2, -HALF+0.9), shaftB = new THREE.Vector3(0, 0, -10.5);
+  var shaftLen = shaftA.distanceTo(shaftB);
+  var shaftMat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, side:THREE.DoubleSide, blending:THREE.AdditiveBlending, fog:false,
+    uniforms:{ uLevel:{value:0}, uH:{value:shaftLen} },
+    vertexShader:'uniform float uH; varying vec3 vN; varying vec3 vV; varying float vT; void main(){ vec4 mv = modelViewMatrix*vec4(position,1.0); vN = normalize(normalMatrix*normal); vV = normalize(-mv.xyz); vT = (position.y + uH*0.5)/uH; gl_Position = projectionMatrix*mv; }',
+    fragmentShader:'varying vec3 vN; varying vec3 vV; varying float vT; uniform float uLevel; void main(){ float e = pow(abs(dot(normalize(vN), normalize(vV))), 1.6); float a = e*(0.015 + 0.09*vT*vT)*smoothstep(0.0,0.14,vT)*uLevel; gl_FragColor = vec4(vec3(0.55,0.85,0.9)*a, a); }'
+  });
+  var shaft = new THREE.Mesh(new THREE.ConeGeometry(5.0, shaftLen, 48, 1, true), shaftMat);
+  shaft.position.copy(shaftA).add(shaftB).multiplyScalar(0.5);
+  shaft.quaternion.setFromUnitVectors(new THREE.Vector3(0,-1,0), shaftB.clone().sub(shaftA).normalize());
+  shaft.frustumCulled = false; scene.add(shaft);
+
+  /* the artifact's light: the room's one real sun */
+  var ART_Y = 3.6;
+  var artLight = new THREE.PointLight(0x66ffaa, 0, 40, 1.8);
+  artLight.position.set(0, ART_Y, 0);
+  if(SHADOWS){
+    artLight.castShadow = true;
+    artLight.shadow.mapSize.set(1024,1024);
+    artLight.shadow.camera.near = 0.6; artLight.shadow.camera.far = 40;
+    artLight.shadow.bias = -0.003; artLight.shadow.normalBias = 0.03;
+  }
+  scene.add(artLight);
+
+  /* ---------- motes hanging in the air, visible only near the light ---------- */
+  var dpos = new Float32Array(NDUST*3), dseed = new Float32Array(NDUST);
+  for(var di=0; di<NDUST; di++){
+    dpos[di*3] = (Math.random()-0.5)*44; dpos[di*3+1] = Math.random()*18; dpos[di*3+2] = (Math.random()-0.5)*44; dseed[di] = Math.random()*100;
+  }
+  var dgeo = new THREE.BufferGeometry();
+  dgeo.setAttribute('position', new THREE.BufferAttribute(dpos,3));
+  dgeo.setAttribute('aSeed', new THREE.BufferAttribute(dseed,1));
+  var dmat = new THREE.ShaderMaterial({
+    transparent:true, depthWrite:false, blending:THREE.AdditiveBlending,
+    uniforms:{ uTime:{value:0}, uC:{value:new THREE.Vector3(0,3.6,0)}, uLevel:{value:0}, uSize:{value:30} },
+    vertexShader:[
+      'uniform float uTime; uniform vec3 uC; uniform float uLevel; uniform float uSize; attribute float aSeed; varying float vA;',
+      'void main(){',
+      ' vec3 p = position;',
+      ' p.x += sin(uTime*0.07 + aSeed*3.1)*1.6 + sin(uTime*0.21 + aSeed)*0.4;',
+      ' p.y = mod(position.y + uTime*0.15 + aSeed, 18.0) + 0.3;',
+      ' p.z += cos(uTime*0.06 + aSeed*2.3)*1.6;',
+      ' float d = length(p - uC);',
+      ' vA = (smoothstep(14.0, 1.5, d)*0.6 + 0.015)*uLevel*(0.55 + 0.45*sin(uTime*1.3 + aSeed*5.0));',
+      ' vec4 mv = modelViewMatrix*vec4(p,1.0);',
+      ' gl_PointSize = uSize/max(0.5, -mv.z);',
+      ' gl_Position = projectionMatrix*mv; }'
+    ].join('\n'),
+    fragmentShader:[
+      'varying float vA;',
+      'void main(){ float r = length(gl_PointCoord - 0.5)*2.0; float a = smoothstep(1.0, 0.0, r);',
+      ' gl_FragColor = vec4(vec3(0.5,1.0,0.7), a*vA); }'
+    ].join('\n')
+  });
+  var dust = new THREE.Points(dgeo, dmat); dust.frustumCulled = false; scene.add(dust);
+
+  /* =====================================================================
+     THE ARTIFACT
+     ===================================================================== */
   var NOISE = [
     'vec3 mod289(vec3 x){ return x - floor(x*(1.0/289.0))*289.0; }',
     'vec4 mod289(vec4 x){ return x - floor(x*(1.0/289.0))*289.0; }',
@@ -118,7 +552,7 @@ body{
     'uniform float uTime; uniform float uPull; uniform float uCharge; uniform float uWaveT; uniform float uWaveAmp;',
     'uniform vec3 uMag; uniform vec3 uWaveO;',
     'attribute vec3 aB;',
-    'varying vec3 vWN; varying vec3 vWP; varying float vD; varying vec3 vB;',
+    'varying vec3 vWN; varying vec3 vWP; varying vec3 vL; varying float vD; varying vec3 vB;',
     NOISE,
     'float disp(vec3 p){',
     ' float t = uTime;',
@@ -140,35 +574,37 @@ body{
     ' vec3 p = normalize(position);',
     ' vec3 up = abs(p.y) < 0.99 ? vec3(0.0,1.0,0.0) : vec3(1.0,0.0,0.0);',
     ' vec3 t1 = normalize(cross(p, up)); vec3 t2 = cross(p, t1);',
-    ' float e = 0.015;',
+    ' float e = 0.02;',
     ' vec3 pa = normalize(p + t1*e); vec3 pb = normalize(p + t2*e);',
     ' float d0 = disp(p); float d1 = disp(pa); float d2 = disp(pb);',
     ' float R = 1.15;',
     ' vec3 P0 = p*(R+d0); vec3 P1 = pa*(R+d1); vec3 P2 = pb*(R+d2);',
     ' vec3 n = normalize(cross(P1-P0, P2-P0)); if(dot(n,p) < 0.0) n = -n;',
-    ' vD = d0; vWN = n; vWP = P0; vB = aB;',
-    ' gl_Position = projectionMatrix*viewMatrix*vec4(P0,1.0);',
+    ' vD = d0; vL = P0; vB = aB;',
+    ' vWP = (modelMatrix*vec4(P0,1.0)).xyz;',
+    ' vWN = normalize(mat3(modelMatrix)*n);',
+    ' gl_Position = projectionMatrix*modelViewMatrix*vec4(P0,1.0);',
     '}'
   ].join('\n');
 
   var FRAG = [
     'uniform float uTime; uniform float uCharge; uniform float uScan; uniform float uWireAmt; uniform vec2 uTilt; uniform vec3 uMag;',
-    'varying vec3 vWN; varying vec3 vWP; varying float vD; varying vec3 vB;',
+    'varying vec3 vWN; varying vec3 vWP; varying vec3 vL; varying float vD; varying vec3 vB;',
     'mat2 rot(float a){ float c = cos(a), s = sin(a); return mat2(c,-s,s,c); }',
     'vec3 env(vec3 r, float hot){',
     ' r.xz = rot(uTime*0.05 + uTilt.x*1.2)*r.xz;',
     ' r.yz = rot(uTilt.y*0.8)*r.yz;',
     ' float az = atan(r.z, r.x);',
-    ' vec3 grn = vec3(0.0,1.0,0.3); vec3 mint = vec3(0.8,1.0,0.88); vec3 amb = vec3(1.0,0.42,0.04); vec3 hotc = vec3(1.0,0.3,0.02);',
-    ' vec3 col = mix(vec3(0.0), vec3(0.0,0.035,0.01), smoothstep(-0.6,1.0,r.y));',
+    ' vec3 grn = vec3(0.0,1.0,0.3); vec3 mint = vec3(0.8,1.0,0.88); vec3 amb = vec3(0.9,0.05,0.03); vec3 hotc = vec3(1.0,0.04,0.02);',
+    ' vec3 col = mix(vec3(0.0), vec3(0.0,0.03,0.01), smoothstep(-0.6,1.0,r.y));',
     ' float l1 = pow(0.5+0.5*sin(az*7.0 + r.y*4.0 - uTime*0.55), 36.0);',
     ' float l2 = pow(0.5+0.5*sin(az*3.0 - r.y*6.0 + uTime*0.35 + 1.7), 60.0);',
     ' float l3 = pow(0.5+0.5*sin(r.y*14.0 + az + uTime*0.25), 90.0);',
-    ' col += grn*l1*3.0 + mint*l2*3.5 + mix(grn, hotc, hot)*l3*2.6;',
+    ' col += grn*l1*3.0 + mint*l2*3.2 + mix(grn, hotc, hot)*l3*2.6;',
     ' vec3 sb = normalize(vec3(0.6,0.7,-0.4)); sb.xz = rot(-uTime*0.08)*sb.xz;',
-    ' col += mint*pow(max(dot(r,sb),0.0), 60.0)*3.0;',
+    ' col += mint*pow(max(dot(r,sb),0.0), 60.0)*2.6;',
     ' vec3 sl = normalize(vec3(-0.8,0.1,0.5)); sl.xz = rot(uTime*0.06)*sl.xz;',
-    ' col += amb*pow(max(dot(r,sl),0.0), 90.0)*(1.1 + 2.2*hot);',
+    ' col += amb*pow(max(dot(r,sl),0.0), 90.0)*(1.3 + 2.6*hot);',
     ' col += vec3(0.0,0.2,0.06)*pow(max(-r.y,0.0), 3.0)*0.7;',
     ' return col;',
     '}',
@@ -181,7 +617,7 @@ body{
     ' float fw = fwidth(wm);',
     ' float wire = 1.0 - smoothstep(fw*0.5, fw*1.5, wm);',
     ' float front = gl_FrontFacing ? 1.0 : 0.0;',
-    ' float solidM = smoothstep(uScan - 0.05, uScan + 0.05, vWP.y)*front;',
+    ' float solidM = smoothstep(uScan - 0.05, uScan + 0.05, vL.y)*front;',
     ' float wireOnly = 1.0 - solidM;',
     ' float wireA = wire*uWireAmt*(0.5 + 0.5*front);',
     ' if(wireOnly > 0.5 && wireA < 0.04) discard;',
@@ -194,18 +630,18 @@ body{
     ' c = c*(0.5 + 0.9*fres) + vec3(0.0,0.45,0.12)*fres*0.8;',
     ' float w = abs(fract(vD*9.0 + uTime*0.03) - 0.5);',
     ' float vein = 1.0 - smoothstep(0.0, 0.03, w);',
-    ' c += mix(vec3(0.0,1.0,0.35), vec3(1.0,0.38,0.02), hot)*vein*(0.1 + 1.8*uCharge*(0.3+hot));',
-    ' c += vec3(1.0,0.3,0.02)*hot*0.4;',
-    ' vec3 wc = vec3(0.1,1.0,0.4)*(1.3 + 0.7*sin(vWP.y*6.0 - uTime*2.0));',
+    ' c += mix(vec3(0.0,1.0,0.35), vec3(1.0,0.05,0.03), hot)*vein*(0.1 + 1.8*uCharge*(0.3+hot));',
+    ' c += vec3(1.0,0.04,0.02)*hot*0.45;',
+    ' vec3 wc = vec3(0.1,1.0,0.4)*(1.3 + 0.7*sin(vL.y*6.0 - uTime*2.0));',
     ' vec3 col = c*solidM + wc*wireA*wireOnly;',
-    ' float q = (vWP.y - uScan)*10.0;',
+    ' float q = (vL.y - uScan)*10.0;',
     ' float band = exp(-q*q)*step(-2.6, uScan)*step(uScan, 2.6);',
     ' col += vec3(0.75,1.0,0.85)*band*1.8*(0.5 + 0.5*front);',
     ' gl_FragColor = vec4(col, 1.0);',
     '}'
   ].join('\n');
 
-  var mat = new THREE.ShaderMaterial({
+  var amat = new THREE.ShaderMaterial({
     vertexShader: VERT, fragmentShader: FRAG, side: THREE.DoubleSide,
     extensions: { derivatives: true },
     uniforms:{
@@ -214,20 +650,18 @@ body{
       uScan:{value:3.0}, uWireAmt:{value:0}, uTilt:{value:new THREE.Vector2(0,0)}
     }
   });
-  var geo = new THREE.IcosahedronGeometry(1, 12);
-  var cnt = geo.attributes.position.count, bary = new Float32Array(cnt*3);
-  for(var bi=0; bi<cnt; bi+=3){
-    bary[bi*3]=1; bary[bi*3+1]=0; bary[bi*3+2]=0;
-    bary[bi*3+3]=0; bary[bi*3+4]=1; bary[bi*3+5]=0;
-    bary[bi*3+6]=0; bary[bi*3+7]=0; bary[bi*3+8]=1;
-  }
-  geo.setAttribute('aB', new THREE.BufferAttribute(bary, 3));
-  var mesh = new THREE.Mesh(geo, mat);
-  mesh.frustumCulled = false;
-  scene.add(mesh);
-  var U = mat.uniforms;
+  var ageo = new THREE.IcosahedronGeometry(1, 12);
+  var acnt = ageo.attributes.position.count, abary = new Float32Array(acnt*3);
+  for(var bi=0; bi<acnt; bi+=3){ abary[bi*3]=1; abary[bi*3+4]=1; abary[bi*3+8]=1; }
+  ageo.setAttribute('aB', new THREE.BufferAttribute(abary, 3));
+  var art = new THREE.Mesh(ageo, amat);
+  art.frustumCulled = false; art.scale.setScalar(1.35); art.position.set(0, ART_Y, 0);
+  scene.add(art);
+  var U = amat.uniforms;
 
-  /* ---------- post ---------- */
+  /* =====================================================================
+     POST: crushed blacks, drained colour, heavy vignette
+     ===================================================================== */
   var composer, bloom, finalPass;
   if(!useComposer){
     renderer.toneMapping = THREE.ACESFilmicToneMapping;
@@ -238,29 +672,31 @@ body{
     if(composer.setPixelRatio) composer.setPixelRatio(DPR);
     composer.setSize(innerWidth, innerHeight);
     composer.addPass(new THREE.RenderPass(scene, camera));
-    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), 0.9, 0.8, 0.7);
+    bloom = new THREE.UnrealBloomPass(new THREE.Vector2(innerWidth, innerHeight), BLOOM_BASE, 0.85, 0.65);
     composer.addPass(bloom);
     finalPass = new THREE.ShaderPass({
-      uniforms:{ tDiffuse:{value:null}, uTime:{value:0}, uGlow:{value:0}, uCharge:{value:0}, uAspect:{value:innerWidth/innerHeight}, uExp:{value:1.15} },
+      uniforms:{ tDiffuse:{value:null}, uTime:{value:0}, uCharge:{value:0}, uAspect:{value:innerWidth/innerHeight}, uExp:{value:1.1} },
       vertexShader:'varying vec2 vUv; void main(){ vUv = uv; gl_Position = projectionMatrix*modelViewMatrix*vec4(position,1.0); }',
       fragmentShader:[
-        'uniform sampler2D tDiffuse; uniform float uTime; uniform float uGlow; uniform float uCharge; uniform float uAspect; uniform float uExp; varying vec2 vUv;',
+        'uniform sampler2D tDiffuse; uniform float uTime; uniform float uCharge; uniform float uAspect; uniform float uExp; varying vec2 vUv;',
         'float hash(vec2 p){ return fract(sin(dot(p, vec2(12.9898,78.233)))*43758.5453); }',
         'float b2(vec2 p){ vec2 q = mod(floor(p), 2.0); return q.x*2.0 + q.y*3.0 - q.x*q.y*4.0; }',
         'float b4(vec2 p){ return (4.0*b2(p) + b2(p*0.5))/16.0; }',
         'void main(){',
         ' vec2 cc = vUv - 0.5; vec2 p = cc; p.x *= uAspect; float r = length(p);',
-        ' vec2 off = cc*0.005*length(cc);',
+        ' vec2 off = cc*0.008*length(cc);',
         ' vec3 c = vec3(texture2D(tDiffuse, vUv+off).r, texture2D(tDiffuse, vUv).g, texture2D(tDiffuse, vUv-off).b);',
-        ' float g = smoothstep(0.95, 0.0, r);',
-        ' c += mix(vec3(0.0,0.045,0.014), vec3(0.2,0.05,0.0), uCharge)*g*g*uGlow;',
         ' c = vec3(1.0) - exp(-c*uExp);',
-        ' c = pow(c, vec3(1.0/2.2));',
-        ' float vig = smoothstep(1.0, 0.25, r*1.35);',
-        ' c *= mix(0.25, 1.0, vig);',
+        ' float lum = dot(c, vec3(0.299,0.587,0.114));',
+        ' c = mix(vec3(lum), c, 0.85);',
+        ' c = max(c - 0.008, 0.0);',
+        ' c = pow(c, vec3(1.0/1.7));',
+        ' float vig = smoothstep(0.9, 0.15, r*1.35);',
+        ' c *= mix(0.1, 1.0, vig);',
+        ' c *= 0.96 + 0.04*sin(uTime*31.0 + r*4.0);',
         ' float L = 36.0;',
         ' c = floor(c*L + b4(gl_FragCoord.xy))/L;',
-        ' c += (hash(vUv*1000.0 + uTime) - 0.5)*0.015;',
+        ' c += (hash(vUv*1000.0 + uTime) - 0.5)*0.018;',
         ' gl_FragColor = vec4(c, 1.0); }'
       ].join('\n')
     });
@@ -268,126 +704,312 @@ body{
     composer.addPass(finalPass);
   }
 
-  function frameDist(){
-    var a = innerWidth/innerHeight, tanH = Math.tan(THREE.MathUtils.degToRad(camera.fov/2));
-    return Math.max(5.4, 1.7/(tanH*Math.min(a, 1.6)));
-  }
-  var camDist = frameDist();
-  addEventListener('resize', function(){
+  function applyRes(){
     DPR = resScale(); renderer.setPixelRatio(DPR);
     renderer.setSize(innerWidth, innerHeight);
-    camera.aspect = innerWidth/innerHeight; camera.updateProjectionMatrix();
     if(composer){ if(composer.setPixelRatio) composer.setPixelRatio(DPR); composer.setSize(innerWidth, innerHeight); finalPass.uniforms.uAspect.value = innerWidth/innerHeight; }
-    camDist = frameDist();
-  });
+    dmat.uniforms.uSize.value = 0.07*innerHeight*DPR;
+    setFov();
+  }
+  dmat.uniforms.uSize.value = 0.07*innerHeight*DPR;
+  addEventListener('resize', applyRes);
 
-  /* ---------- interaction ---------- */
-  var ray = new THREE.Raycaster(), ndc = new THREE.Vector2(), closest = new THREE.Vector3(), magT = new THREE.Vector3(0,0,1);
-  var px = innerWidth/2, py = innerHeight/2, hover = false, ptype = 'mouse';
-  var down = false, charge = 0, pull = 0, flash = 0, waveT = 9, used = false, keyDown = false;
-  var tilt = new THREE.Vector2(), tiltT = new THREE.Vector2(), gyro = false;
+  /* =====================================================================
+     PLAYER
+     ===================================================================== */
+  var player = {x:0, z:18, vx:0, vz:0};
+  var yaw = 0, pitch = 0.12;
+  var keys = {};
+  var joy = {id:null, sx:0, sy:0, x:0, y:0}, lk = {id:null, x:0, y:0};
+  var locked = false, dragMouse = false, lkm = {x:0, y:0};
+  var src = {mouse:false, key:false, btn:false};
+  var CIRC = [[14,14,3.0],[-14,14,3.0],[14,-14,3.0],[-14,-14,3.0],[0,0,5.0]];
+  var EYE = 1.7, SPEED = 3.4, LIM = HALF - 0.6;
 
-  // timeline: a short black beat, the wireframe wakes, a scan plane turns it into chrome
-  var T_WIRE = 0.5, T_SCAN0 = 1.5, T_DONE = 4.3;
-  var t0 = performance.now(), introDone = false, hintShown = false;
-  if(reduce) t0 = performance.now() - 6000;
+  function collide(){
+    player.x = Math.max(-LIM, Math.min(LIM, player.x));
+    player.z = Math.max(-LIM, Math.min(LIM, player.z));
+    for(var i=0;i<CIRC.length;i++){
+      var c = CIRC[i], dx = player.x - c[0], dz = player.z - c[1], d = Math.sqrt(dx*dx + dz*dz);
+      if(d < c[2]){ if(d < 0.0001){ dx = 1; dz = 0; d = 1; } player.x = c[0] + dx/d*c[2]; player.z = c[1] + dz/d*c[2]; }
+    }
+  }
 
+  var T_WIRE = 0.5, T_SCAN0 = 1.5, T_SPAWN = 4.3, T_DONE = 6.8;
+  var t0 = performance.now(), introDone = false, spawned = false;
+  if(reduce) t0 = performance.now() - 9000;
   function skip(){ var t = (performance.now()-t0)/1000; if(t < T_DONE) t0 = performance.now() - (T_DONE + 0.2)*1000; }
-  function useIt(){ if(!used){ used = true; hintEl.classList.add('gone'); } }
-  function press(){ if(!introDone){ skip(); return; } if(!down){ down = true; useIt(); } }
-  function release(){
-    if(!down) return;
-    down = false;
-    U.uWaveO.value.copy(U.uMag.value); U.uWaveAmp.value = 0.1 + 0.42*charge; waveT = 0; flash = 0.35 + charge;
-  }
+
+  function tryLock(){ try{ var p = cv.requestPointerLock && cv.requestPointerLock(); if(p && p.catch) p.catch(function(){}); }catch(_){} }
+  document.addEventListener('pointerlockchange', function(){ locked = (document.pointerLockElement === cv); });
+  document.addEventListener('mousemove', function(e){
+    if(!locked || !introDone) return;
+    yaw -= (e.movementX||0)*0.0022; pitch -= (e.movementY||0)*0.0022;
+    pitch = Math.max(-1.2, Math.min(1.2, pitch));
+  });
+
   cv.addEventListener('pointerdown', function(e){
-    ptype = e.pointerType; px = e.clientX; py = e.clientY; hover = true;
-    try{ cv.setPointerCapture(e.pointerId); }catch(_){}
-    askGyro(); press();
-  });
-  cv.addEventListener('pointermove', function(e){ ptype = e.pointerType; px = e.clientX; py = e.clientY; hover = true; });
-  cv.addEventListener('pointerleave', function(){ if(ptype==='mouse') hover = false; });
-  ['pointerup','pointercancel'].forEach(function(n){ cv.addEventListener(n, function(){ release(); if(ptype!=='mouse') hover = false; }); });
-  cv.addEventListener('keydown', function(e){
     if(!introDone){ skip(); return; }
-    if((e.key === ' ' || e.key === 'Enter') && !keyDown){ keyDown = true; e.preventDefault(); hover = false; ptype = 'key'; press(); }
+    if(e.pointerType === 'touch'){
+      if(!touchMode){ touchMode = true; }
+      try{ cv.setPointerCapture(e.pointerId); }catch(_){}
+      if(e.clientX < innerWidth*0.45 && joy.id === null){
+        joy.id = e.pointerId; joy.sx = e.clientX; joy.sy = e.clientY; joy.x = joy.y = 0;
+        joyEl.style.left = e.clientX + 'px'; joyEl.style.top = e.clientY + 'px'; knobEl.style.transform = 'translate(0,0)'; joyEl.classList.add('on');
+      } else if(lk.id === null){ lk.id = e.pointerId; lk.x = e.clientX; lk.y = e.clientY; }
+      return;
+    }
+    if(!locked){ tryLock(); dragMouse = true; lkm.x = e.clientX; lkm.y = e.clientY; try{ cv.setPointerCapture(e.pointerId); }catch(_){} }
+    else if(e.button === 0) src.mouse = true;
   });
-  cv.addEventListener('keyup', function(e){ if(e.key === ' ' || e.key === 'Enter'){ keyDown = false; release(); } });
-
-  function onOrient(e){
-    if(e.gamma == null || e.beta == null) return;
-    gyro = true;
-    tiltT.set(Math.max(-1, Math.min(1, e.gamma/35)), Math.max(-1, Math.min(1, (e.beta-45)/35)));
-  }
-  var gyroAsked = false;
-  function askGyro(){
-    if(gyroAsked) return; gyroAsked = true;
-    try{
-      if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission === 'function'){
-        DeviceOrientationEvent.requestPermission().then(function(s){ if(s === 'granted') addEventListener('deviceorientation', onOrient); }).catch(function(){});
+  cv.addEventListener('pointermove', function(e){
+    if(e.pointerType === 'touch'){
+      if(e.pointerId === joy.id){
+        var dx = e.clientX - joy.sx, dy = e.clientY - joy.sy, d = Math.sqrt(dx*dx + dy*dy), R = 50;
+        if(d > R){ dx = dx/d*R; dy = dy/d*R; }
+        joy.x = dx/R; joy.y = dy/R; knobEl.style.transform = 'translate(' + dx + 'px,' + dy + 'px)';
+      } else if(e.pointerId === lk.id){
+        yaw -= (e.clientX - lk.x)*0.0055; pitch -= (e.clientY - lk.y)*0.0045;
+        pitch = Math.max(-1.2, Math.min(1.2, pitch)); lk.x = e.clientX; lk.y = e.clientY;
       }
-    }catch(_){}
+    } else if(dragMouse && !locked){
+      yaw -= (e.clientX - lkm.x)*0.004; pitch -= (e.clientY - lkm.y)*0.0035;
+      pitch = Math.max(-1.2, Math.min(1.2, pitch)); lkm.x = e.clientX; lkm.y = e.clientY;
+    }
+  });
+  function endPtr(e){
+    if(e.pointerType === 'touch'){
+      if(e.pointerId === joy.id){ joy.id = null; joy.x = joy.y = 0; joyEl.classList.remove('on'); }
+      if(e.pointerId === lk.id) lk.id = null;
+    } else { dragMouse = false; src.mouse = false; }
   }
-  try{ if(typeof DeviceOrientationEvent !== 'undefined' && typeof DeviceOrientationEvent.requestPermission !== 'function') addEventListener('deviceorientation', onOrient); }catch(_){}
+  cv.addEventListener('pointerup', endPtr); cv.addEventListener('pointercancel', endPtr);
 
-  function aimAtPointer(){
-    ndc.set(px/innerWidth*2 - 1, -(py/innerHeight*2 - 1));
-    ray.setFromCamera(ndc, camera);
-    var o = ray.ray.origin, d = ray.ray.direction;
-    var t = -o.dot(d);
-    closest.copy(o).addScaledVector(d, t);
-    var R = 1.35, l = closest.length();
-    if(l < R){ var tt = t - Math.sqrt(R*R - l*l); magT.copy(o).addScaledVector(d, tt).normalize(); }
-    else magT.copy(closest).normalize();
+  ringEl.addEventListener('pointerdown', function(e){ e.preventDefault(); src.btn = true; ringEl.classList.add('hold'); try{ ringEl.setPointerCapture(e.pointerId); }catch(_){} });
+  function ringUp(){ src.btn = false; ringEl.classList.remove('hold'); }
+  ringEl.addEventListener('pointerup', ringUp); ringEl.addEventListener('pointercancel', ringUp);
+
+  addEventListener('keydown', function(e){
+    if(!introDone){ skip(); return; }
+    keys[e.code] = true;
+    if(e.code === 'Space' || e.code === 'KeyE'){ src.key = true; e.preventDefault(); }
+    if(e.code.indexOf('Arrow') === 0) e.preventDefault();
+  });
+  addEventListener('keyup', function(e){ keys[e.code] = false; if(e.code === 'Space' || e.code === 'KeyE') src.key = false; });
+  addEventListener('blur', function(){ keys = {}; src.key = src.mouse = src.btn = false; ringUp(); });
+
+  /* =====================================================================
+     STATE
+     ===================================================================== */
+  var charge = 0, pull = 0, flash = 0, waveT = 9, wasDown = false, used = false, fired = false, tArt = 0;
+  var roomT = 99, roomSpeed = 14, roomAmpBase = 0;
+  var magT = new THREE.Vector3(0,0,1), tmp = new THREE.Vector3();
+  var movedDist = 0, unlockAt = 0, hintMsg = '', fpsAcc = 0, fpsN = 0, adapt = 0;
+  // rare, violent blackouts of the artifact's light
+  var ST_PAT = [0.04, 0.9, 0.0, 0.55, 0.0, 1.0, 0.08, 0.0];
+  var nextSt = 14 + Math.random()*10, stStart = -1, stMult = 1;
+  // the artifact demonstrates the gesture on its own: it swells, then releases a faint pulse
+  var teaseT = -1, teaseFired = false, nextTease = 0;
+  var lookAcc = 0, lastYaw = 0, lastPitch = 0.12, didLook = false, didMove = false;
+
+  function fireRoom(speed, amp, hot, mode){ roomT = 0; roomSpeed = speed; roomAmpBase = amp; WU.uHot.value = hot; WU.uMode.value = mode; }
+
+  function setHint(msg){
+    if(msg === hintMsg) return; hintMsg = msg;
+    if(!msg){ hintEl.classList.remove('on'); return; }
+    hintEl.textContent = msg; hintEl.classList.add('on');
   }
 
-  /* ---------- frame ---------- */
+  /* =====================================================================
+     FRAME
+     ===================================================================== */
   var last = t0;
   function frame(now){
     requestAnimationFrame(frame);
     var dt = Math.min(0.05, (now-last)/1000); last = now;
     var t = (now - t0)/1000;
 
-    // the build: wire first, then a plane sweeps down and everything it passes becomes metal
+    /* ---- intro ---- */
     U.uWireAmt.value = sstep(T_WIRE, T_WIRE + 1.0, t);
     var scan;
     if(t < T_SCAN0) scan = 3.0;
-    else if(t < T_DONE) scan = 2.1 - 4.2*ease((t-T_SCAN0)/(T_DONE-T_SCAN0));
+    else if(t < T_SPAWN) scan = 2.1 - 4.2*ease((t-T_SCAN0)/(T_SPAWN-T_SCAN0));
     else scan = -3.0;
     U.uScan.value = scan;
 
-    if(!introDone && t >= T_DONE){
-      introDone = true;
-      U.uWaveO.value.set(0,-1,0); U.uWaveAmp.value = 0.2; waveT = 0; flash = 1.0;
+    if(!spawned && t >= T_SPAWN){
+      spawned = true;
+      U.uWaveO.value.set(0,-1,0); U.uWaveAmp.value = 0.24; waveT = 0; flash = 1.2;
+      fireRoom(11, 1.0, 0, 0);
     }
-    if(!hintShown && t > T_DONE + 1.4){ hintShown = true; if(!used) hintEl.classList.add('on'); }
+    if(!introDone && t >= T_DONE){ introDone = true; unlockAt = t; }
 
+    var ts = Math.max(0, t - T_SPAWN);
+    var artLv = spawned ? sstep(0, 1.8, ts) : 0;
+
+    /* ---- rare stutter of the artifact's light ---- */
+    if(spawned && ts > 6){
+      if(stStart < 0 && t > nextSt) stStart = t;
+      if(stStart >= 0){
+        var tau = t - stStart;
+        if(tau > 1.0){ stStart = -1; nextSt = t + 20 + Math.random()*26; stMult = 1; }
+        else stMult = ST_PAT[Math.floor(tau*13) % ST_PAT.length];
+      }
+    }
+
+    /* ---- torches (blood red), window (pale) ---- */
+    var tl = [];
+    for(var i=0;i<4;i++){
+      var lv = sstep(1.0 + 0.5*i, 1.8 + 0.5*i, ts);
+      tl.push(lv);
+      var f = flames[i], fl = flick(t, f.ph*2.0 + i*3.7);
+      f.mat.color.setRGB(1.0*lv*2.6*fl, 0.06*lv*2.6*fl, 0.02*lv*2.6*fl);
+      f.mesh.scale.set(1, 0.7 + 0.5*fl*lv, 1);
+    }
+    torchLights.forEach(function(tt){
+      var f = flames[tt.idx];
+      tt.light.intensity = 3.6*tl[tt.idx]*flick(t, f.ph*2.0 + tt.idx*3.7);
+    });
+    var winLv = sstep(3.4, 4.6, ts)*flick(t, 9.1);
+    winMat.color.setRGB(0.45*winLv*1.5, 0.72*winLv*1.5, 0.78*winLv*1.5);
+    winSpot.intensity = 2.6*winLv;
+    shaftMat.uniforms.uLevel.value = winLv;
+    amb.intensity = 0.11*artLv + 0.2*Math.min(1, flash)*artLv;
+
+    /* ---- cloth, chains, column flames ---- */
+    var decoLv = sstep(1.6, 2.8, ts);
+    for(var bj=0; bj<banners.length; bj++){
+      var bn = banners[bj], bp = bn.geo.attributes.position;
+      for(var vi=0; vi<bp.count; vi++){
+        var fy = clamp01((3 - bn.oy[vi])/6);
+        bp.setZ(vi, bn.oz[vi] + Math.sin(t*0.9 + bn.oy[vi]*0.9 + bn.ph)*0.18*fy);
+      }
+      bp.needsUpdate = true;
+    }
+    for(var cj=0; cj<chains.length; cj++){ var ch = chains[cj]; ch.group.rotation.z = 0.025*Math.sin(t*0.4 + ch.ph); ch.group.rotation.x = 0.02*Math.sin(t*0.33 + ch.ph*2.0); }
+    for(var hj=0; hj<hang.length; hj++){ var hh = hang[hj], hv = flick(t, hh.ph*2.0 + 11.0)*decoLv; hh.mat.color.setRGB(1.0*hv*1.8, 0.05*hv*1.8, 0.02*hv*1.8); hh.mesh.scale.y = 0.7 + 0.5*hv; }
+    for(var sj=0; sj<sconces.length; sj++){ var sc = sconces[sj], sv = flick(t, sc.ph*2.0 + 5.0)*decoLv; sc.mat.color.setRGB(1.0*sv*2.2, 0.05*sv*2.2, 0.02*sv*2.2); sc.mesh.scale.y = 0.7 + 0.5*sv; if(sc.light) sc.light.intensity = 2.4*sv; }
+
+    /* ---- player ---- */
+    if(introDone){
+      var fwd = (keys.KeyW||keys.ArrowUp ? 1:0) - (keys.KeyS||keys.ArrowDown ? 1:0) - joy.y;
+      var rgt = (keys.KeyD||keys.ArrowRight ? 1:0) - (keys.KeyA||keys.ArrowLeft ? 1:0) + joy.x;
+      var ml = Math.sqrt(fwd*fwd + rgt*rgt); if(ml > 1){ fwd /= ml; rgt /= ml; }
+      var sy = Math.sin(yaw), cy = Math.cos(yaw);
+      var tvx = (-sy*fwd + cy*rgt)*SPEED, tvz = (-cy*fwd - sy*rgt)*SPEED;
+      var k = Math.min(1, dt*9);
+      player.vx += (tvx - player.vx)*k; player.vz += (tvz - player.vz)*k;
+      var ox = player.x, oz = player.z;
+      player.x += player.vx*dt; player.z += player.vz*dt;
+      collide();
+      movedDist += Math.sqrt((player.x-ox)*(player.x-ox) + (player.z-oz)*(player.z-oz));
+    }
+    var introPush = reduce ? 1 : ease(t/T_SPAWN);
+    camera.position.set(player.x, EYE, player.z + (introDone ? 0 : 1.8*(1 - introPush)));
+    camera.rotation.set(pitch, yaw, 0);
+
+    /* ---- the artifact notices you ---- */
+    tmp.set(player.x - art.position.x, EYE - art.position.y, player.z - art.position.z);
+    var dist = tmp.length(); tmp.normalize();
+    var prox = sstep(11, 5, dist);
+    magT.copy(tmp);
+    U.uMag.value.lerp(magT, Math.min(1, dt*5)).normalize();
+
+    var tease = 0;
+    if(introDone && !fired && !used){
+      if(teaseT < 0 && t > unlockAt + 6 && t > nextTease) teaseT = 0;
+      if(teaseT >= 0){
+        teaseT += dt;
+        tease = sstep(0, 1.3, teaseT)*(1 - sstep(1.5, 1.7, teaseT));
+        if(!teaseFired && teaseT >= 1.6){
+          teaseFired = true;
+          U.uWaveO.value.copy(U.uMag.value); U.uWaveAmp.value = 0.14; waveT = 0; flash = 0.35;
+          fireRoom(15, 0.3, 0.3, 1);
+        }
+        if(teaseT > 2.3){ teaseT = -1; teaseFired = false; nextTease = t + 9; }
+      }
+    } else { teaseT = -1; }
+
+    var down = introDone && (src.mouse || src.key || src.btn);
     if(down) charge = Math.min(1, charge + dt/1.6); else charge = Math.max(0, charge - dt*2.4);
-    var tp = 0;
-    if(down) tp = 0.5 + 0.5*charge; else if(hover && ptype === 'mouse') tp = 0.28;
+    if(wasDown && !down){
+      U.uWaveO.value.copy(U.uMag.value); U.uWaveAmp.value = 0.1 + 0.42*charge; waveT = 0; flash = 0.35 + charge;
+      fireRoom(15, 0.5 + 0.5*charge, charge, 1); used = true; fired = true;
+    }
+    if(down) used = true;
+    wasDown = down;
+
+    var tp = prox*0.45 + (down ? 0.5*charge : 0) + tease*0.3;
     pull += (tp - pull)*Math.min(1, dt*5);
     waveT += dt; if(waveT > 7) U.uWaveAmp.value = 0;
     flash *= Math.exp(-dt*2.6);
 
-    if(!gyro){ tiltT.set((px/innerWidth-0.5)*0.9, -(py/innerHeight-0.5)*0.7); }
-    tilt.lerp(tiltT, Math.min(1, dt*2.2));
-    var pushIn = reduce ? 1 : ease((t-0.3)/4.2);
-    var dist = camDist*(1 + 0.18*(1-pushIn));
-    camera.position.set(tilt.x*0.6, -tilt.y*0.35, dist);
-    camera.lookAt(0,0,0);
-    camera.updateMatrixWorld();
-    aimAtPointer();
-    U.uMag.value.lerp(magT, Math.min(1, dt*8)).normalize();
+    tArt += dt*(1 + prox*1.2 + charge*1.5);
+    U.uTime.value = tArt*(reduce ? 0.3 : 1);
+    var vis = Math.max(charge, tease*0.38);
+    U.uPull.value = pull; U.uCharge.value = vis; U.uWaveT.value = waveT;
+    art.position.y = ART_Y + 0.08*Math.sin(t*0.6);
 
-    U.uTime.value = t*(reduce ? 0.3 : 1);
-    U.uPull.value = pull; U.uCharge.value = charge; U.uWaveT.value = waveT;
-    U.uTilt.value.copy(tilt);
+    /* ---- room wave: wireframe reveal ---- */
+    roomT += dt;
+    var R = roomT*roomSpeed;
+    WU.uWaveR.value = R;
+    WU.uWaveAmp.value = roomAmpBase*(1 - sstep(30, 54, R));
+    WU.uTrail.value = 8 + 8*roomAmpBase;
+    WU.uWaveC.value.set(art.position.x, art.position.y, art.position.z);
+
+    /* ---- the sun: sickly, throbbing, and (rarely) it dies for a moment; blood red when charged ---- */
+    artLight.color.setRGB(0.32 + 0.68*vis, 0.9 - 0.84*vis, 0.6 - 0.57*vis);
+    var beat = Math.pow(Math.max(0, Math.sin(tArt*1.5)), 10)*0.5 + Math.pow(Math.max(0, Math.sin(tArt*1.5 - 0.75)), 10)*0.3;
+    artLight.intensity = (1.9 + 0.6*Math.sin(tArt*0.7) + 1.7*vis + 2.4*flash)*(1 + 0.5*beat)*stMult*artLv;
+    artLight.position.set(0.35*Math.sin(tArt*0.45), art.position.y + 0.15*Math.sin(tArt*0.9), 0.35*Math.cos(tArt*0.38));
+
+    dmat.uniforms.uTime.value = t; dmat.uniforms.uC.value.copy(art.position); dmat.uniforms.uLevel.value = artLv*(0.3 + 0.7*stMult);
+
+    /* ---- hints and touch UI: charging works from anywhere in the room ---- */
+    var msg = '';
+    if(introDone && !fired){
+      var since = t - unlockAt;
+      if(down) msg = touchMode ? 'Let go to send the light' : 'Release to send the light';
+      else if(!used && movedDist < 3 && since > 0.6 && since < 12) msg = touchMode ? 'Left thumb walks, drag the right side to look' : 'Click to look around, WASD to walk';
+      else if(since < 90) msg = touchMode ? 'Hold the ring, let go to send the light' : 'Hold space, release to send the light';
+    }
+    /* ---- wordless cues: key glyphs on desktop, ghost gestures on touch; each fades once you've done the thing ---- */
+    var cueOn = introDone && (t - unlockAt) > 0.8;
+    lookAcc += Math.abs(yaw - lastYaw) + Math.abs(pitch - lastPitch); lastYaw = yaw; lastPitch = pitch;
+    if(lookAcc > 0.5) didLook = true;
+    if(movedDist > 4) didMove = true;
+    gLookEl.classList.toggle('on', cueOn && !touchMode && !didLook);
+    gMoveEl.classList.toggle('on', cueOn && !touchMode && !didMove);
+    gActEl.classList.toggle('on', cueOn && !touchMode && !fired);
+    gJoyEl.classList.toggle('on', cueOn && touchMode && !didMove);
+    gLkEl.classList.toggle('on', cueOn && touchMode && !didLook);
+    kW.classList.toggle('dn', !!(keys.KeyW || keys.ArrowUp));
+    kA.classList.toggle('dn', !!(keys.KeyA || keys.ArrowLeft));
+    kS.classList.toggle('dn', !!(keys.KeyS || keys.ArrowDown));
+    kD.classList.toggle('dn', !!(keys.KeyD || keys.ArrowRight));
+    kSp.classList.toggle('dn', !!(src.key || src.mouse));
+    setHint('');
+    ringEl.classList.toggle('on', touchMode && introDone);
+    ringEl.classList.toggle('cue', !used);
+
+    /* ---- adaptive quality ---- */
+    if(t > 3){
+      fpsAcc += dt; fpsN++;
+      if(fpsAcc > 2.5){
+        var ms = fpsAcc/fpsN*1000;
+        if(ms > 24 && adapt < 3){
+          adapt++; qW = Math.max(360, qW*0.8); applyRes();
+          if(adapt >= 2 && bloom) bloom.enabled = false;
+        }
+        fpsAcc = 0; fpsN = 0;
+      }
+    }
 
     if(useComposer){
-      bloom.strength = 0.9 + flash*1.2 + charge*0.4;
+      bloom.strength = BLOOM_BASE + flash*1.2 + charge*0.4;
       finalPass.uniforms.uTime.value = t % 100;
       finalPass.uniforms.uCharge.value = charge;
-      finalPass.uniforms.uGlow.value = sstep(0.6, 2.5, t);
       composer.render(dt);
     } else renderer.render(scene, camera);
   }
